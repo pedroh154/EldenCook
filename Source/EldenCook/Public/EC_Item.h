@@ -6,7 +6,7 @@
 
 class AEldenCookCharacter;
 
-UCLASS()
+UCLASS(Abstract)
 class ELDENCOOK_API AEC_Item : public AActor
 {
 	GENERATED_BODY()
