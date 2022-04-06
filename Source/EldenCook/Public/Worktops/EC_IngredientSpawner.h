@@ -12,6 +12,9 @@ UCLASS()
 class ELDENCOOK_API AEC_IngredientSpawner : public AEC_Worktop
 {
 	GENERATED_BODY()
+	
+public:
+	AEC_IngredientSpawner();
 
 protected:
 	UPROPERTY(EditAnywhere, Category="Settings")

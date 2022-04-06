@@ -6,10 +6,7 @@
 #include "EC_Item.h"
 #include "EC_BaseIngredient.generated.h"
 
-/**
- * 
- */
-UCLASS()
+UCLASS(Abstract)
 class ELDENCOOK_API AEC_BaseIngredient : public AEC_Item
 {
 	GENERATED_BODY()

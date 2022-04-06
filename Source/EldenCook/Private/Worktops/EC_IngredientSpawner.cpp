@@ -3,3 +3,8 @@
 
 #include "EldenCook/Public/Worktops/EC_IngredientSpawner.h"
 #include "EldenCook/Public/EC_BaseIngredient.h"
+
+AEC_IngredientSpawner::AEC_IngredientSpawner()
+{
+	
+}
