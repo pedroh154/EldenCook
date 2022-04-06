@@ -22,7 +22,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleDefaultsOnly, Category="Components")
-	UStaticMeshComponent* Mesh;
+	UStaticMeshComponent* MeshComponent;
 
 	UPROPERTY(VisibleAnywhere, Category="Status")
 	AEC_Item* CurrentItem;
