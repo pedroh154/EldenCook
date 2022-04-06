@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{ED60DC79-4B76-D264-3F6E-54A133DEAB97}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "EldenCook",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}
