@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "EldenCookCharacter.generated.h"
 
+class AEC_Item;
+
 UCLASS(Blueprintable)
 class AEldenCookCharacter : public ACharacter
 {
@@ -30,5 +32,13 @@ private:
 	/** Camera boom positioning the camera above the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category="Config|Player")
+	int32 HP;
+
+	UPROPERTY(VisibleAnywhere, Category="Status")
+	AEC_Item* CurrentItem;
+	
 };
 

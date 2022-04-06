@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Materials/Material.h"
 #include "Engine/World.h"
+#include "EldenCook/Public/EC_Item.h"
 
 AEldenCookCharacter::AEldenCookCharacter()
 {
@@ -35,6 +36,8 @@ AEldenCookCharacter::AEldenCookCharacter()
 	CameraBoom->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
 	CameraBoom->bDoCollisionTest = false; // Don't want to pull camera in when it collides with level
 
+	CameraBoom->CameraLagSpeed = 0.00001; //make speed so slow that camera does not move at all (static camera)
+
 	// Create a camera...
 	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
 	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -43,6 +46,8 @@ AEldenCookCharacter::AEldenCookCharacter()
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	HP = 3;
 }
 
 void AEldenCookCharacter::Tick(float DeltaSeconds)
