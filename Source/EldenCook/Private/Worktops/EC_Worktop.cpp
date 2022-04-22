@@ -2,7 +2,7 @@
 
 
 #include "EldenCook/Public/Worktops/EC_Worktop.h"
-#include "EldenCook/Public/EC_Item.h"
+#include "EldenCook/Public/Items/EC_Item.h"
 
 // Sets default values
 AEC_Worktop::AEC_Worktop()
