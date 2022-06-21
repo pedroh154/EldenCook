@@ -3,3 +3,6 @@
 
 #include "Interfaces/EC_InteractableInterface.h"
 
+void IEC_InteractableInterface::OnInteract()
+{
+}

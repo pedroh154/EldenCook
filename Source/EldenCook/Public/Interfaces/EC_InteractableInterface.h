@@ -4,7 +4,7 @@
 #include "EC_InteractableInterface.generated.h"
 
 UINTERFACE(MinimalAPI, Blueprintable)
-class ELDENCOOK_API UEC_InteractableInterface : public UInterface
+class UEC_InteractableInterface : public UInterface
 {
 	GENERATED_BODY()
 	

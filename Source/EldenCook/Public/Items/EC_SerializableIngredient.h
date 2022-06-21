@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "EC_Item.h"
-#include "EC_BaseIngredient.generated.h"
+#include "EC_SerializableIngredient.generated.h"
 
-UCLASS(Abstract)
-class ELDENCOOK_API AEC_BaseIngredient : public AEC_Item
+UCLASS(NotBlueprintable, NotPlaceable)
+class ELDENCOOK_API AEC_SerializableIngredient : public AEC_Item
 {
 	GENERATED_BODY()
 	
