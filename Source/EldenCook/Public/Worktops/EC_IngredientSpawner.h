@@ -19,5 +19,7 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, Category="Settings")
 	TSubclassOf<AEC_BaseIngredient> IngredientClass;
+
+	virtual void OnInteract() override;
 	
 };

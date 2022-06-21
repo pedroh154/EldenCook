@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interfaces/EC_InteractableInterface.h"
 #include "EC_Worktop.generated.h"
 
 class AEC_Item;
 
 UCLASS(Abstract)
-class ELDENCOOK_API AEC_Worktop : public AActor
+class ELDENCOOK_API AEC_Worktop : public AActor, public IEC_InteractableInterface
 {
 	GENERATED_BODY()
 	
@@ -22,14 +23,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleDefaultsOnly, Category="Components")
-	UStaticMeshComponent* MeshComponent;
-
-	UPROPERTY(VisibleAnywhere, Category="Status")
-	AEC_Item* CurrentItem;
+	UStaticMeshComponent* Mesh;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	virtual void OnInteract() PURE_VIRTUAL(AEC_Worktop::OnInteract, );
 };

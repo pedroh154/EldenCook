@@ -8,3 +8,8 @@ AEC_IngredientSpawner::AEC_IngredientSpawner()
 {
 	
 }
+
+void AEC_IngredientSpawner::OnInteract()
+{
+	Super::OnInteract();
+}
