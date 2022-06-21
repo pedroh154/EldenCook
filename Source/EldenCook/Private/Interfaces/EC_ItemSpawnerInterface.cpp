@@ -4,3 +4,7 @@
 #include "Interfaces/EC_ItemSpawnerInterface.h"
 
 // Add default functionality here for any IEC_ItemSpawnerInterface functions that are not pure virtual.
+void IEC_ItemSpawnerInterface::SpawnItem()
+{
+	
+}

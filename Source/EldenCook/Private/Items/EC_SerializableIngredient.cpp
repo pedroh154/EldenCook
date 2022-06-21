@@ -3,3 +3,7 @@
 
 #include "EldenCook/Public/Items/EC_SerializableIngredient.h"
 
+void AEC_SerializableIngredient::Init(UTexture2D* NewHUDIcon)
+{
+	this->HUDIcon = NewHUDIcon;
+}

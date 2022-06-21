@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "EC_Worktop.h"
 #include "Engine/DataTable.h"
+#include "Interfaces/EC_ItemSpawnerInterface.h"
 #include "EC_IngredientSpawner.generated.h"
 
 class AEC_SerializableIngredient;
@@ -23,17 +24,21 @@ struct FIngredient : public FTableRowBase
 
 
 UCLASS()
-class ELDENCOOK_API AEC_IngredientSpawner : public AEC_Worktop
+class ELDENCOOK_API AEC_IngredientSpawner : public AEC_Worktop, public IEC_ItemSpawnerInterface
 {
 	GENERATED_BODY()
 	
 public:
 	AEC_IngredientSpawner();
 
+	virtual void BeginPlay() override;
+
 protected:
 	UPROPERTY(EditAnywhere, Category="Settings")
 	FDataTableRowHandle IngredientToSpawn;
 
 	virtual void OnInteract() override;
+
+	virtual void SpawnItem() override;
 	
 };

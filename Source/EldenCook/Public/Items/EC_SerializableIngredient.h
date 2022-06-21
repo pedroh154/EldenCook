@@ -10,5 +10,11 @@ UCLASS(NotBlueprintable, NotPlaceable)
 class ELDENCOOK_API AEC_SerializableIngredient : public AEC_Item
 {
 	GENERATED_BODY()
+
+protected:
+	UPROPERTY()
+	UTexture2D* HUDIcon;
 	
+public:
+	virtual void Init(UTexture2D* NewHUDIcon);
 };
