@@ -13,6 +13,8 @@ class ELDENCOOK_API AEC_SerializableIngredient : public AEC_Item
 public:
 	AEC_SerializableIngredient();
 
+	virtual void BeginPlay() override;
+
 protected:
 	UPROPERTY()
 	UTexture2D* HUDIcon;

@@ -10,6 +10,11 @@ AEC_SerializableIngredient::AEC_SerializableIngredient()
 	MeshComponent->SetStaticMesh(nullptr);
 }
 
+void AEC_SerializableIngredient::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void AEC_SerializableIngredient::Init(UTexture2D* NewHUDIcon, UStaticMesh* Mesh, const bool NewCuts)
 {
 	this->HUDIcon = NewHUDIcon;

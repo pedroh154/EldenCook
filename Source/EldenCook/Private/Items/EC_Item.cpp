@@ -1,5 +1,6 @@
 #include "EldenCook/Public/Items/EC_Item.h"
 #include "EldenCook/Public/Player/EldenCookCharacter.h"
+#include "Net/UnrealNetwork.h"
 
 AEC_Item::AEC_Item()
 {
@@ -9,6 +10,12 @@ AEC_Item::AEC_Item()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	SetActorEnableCollision(false);
 	bReplicates = true;
+	MeshComponent->SetIsReplicated(true);
+}
+
+void AEC_Item::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
 void AEC_Item::BeginPlay()

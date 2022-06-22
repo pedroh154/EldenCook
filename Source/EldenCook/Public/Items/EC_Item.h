@@ -16,10 +16,11 @@ public:
 	AEC_Item();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
 protected:
-	
-	UPROPERTY(VisibleDefaultsOnly, Category="Components")
+	//needs to replicate bc if we set mesh server-side it won't be set client-side
+	UPROPERTY(VisibleDefaultsOnly, Category="Components", Replicated)
 	UStaticMeshComponent* MeshComponent;
 
 	UPROPERTY(VisibleAnywhere, Category="Status")
