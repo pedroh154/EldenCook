@@ -4,6 +4,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "EldenCook/EldenCook.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EldenCook/Public/Items/EC_Item.h"
@@ -48,6 +49,7 @@ AEldenCookCharacter::AEldenCookCharacter()
 	LineTraceInteractComponent = CreateDefaultSubobject<UEC_LineTraceInteractComponent>(TEXT("LineTraceInteractComponent"));
 	LineTraceInteractComponent->SetupAttachment(GetMesh());
 	LineTraceInteractComponent->TraceDistanceMultiplier = 50000.0f;
+	LineTraceInteractComponent->TraceCollisionChannel = COLLISION_INTERACTABLE;
 
 	HP = 3;
 }

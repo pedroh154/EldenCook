@@ -19,6 +19,8 @@ AEC_Worktop::AEC_Worktop()
 	BoxComponent->SetBoxExtent(FVector(100.0f, 100.0f, 5.0f));
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &AEC_Worktop::OnBoxComponentBeginOverlap);
 	BoxComponent->OnComponentEndOverlap.AddDynamic(this, &AEC_Worktop::OnBoxComponentEndOverlap);
+
+	MeshComponent->SetCollisionProfileName(TEXT("Interactable"));
 }
 
 // Called when the game starts or when spawned
