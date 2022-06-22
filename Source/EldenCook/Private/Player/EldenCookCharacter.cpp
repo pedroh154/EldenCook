@@ -54,3 +54,21 @@ void AEldenCookCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 }
+
+void AEldenCookCharacter::AttachItem(AEC_Item* ItemToAttach, const FName Socket)
+{
+	if(IsValid(ItemToAttach))
+	{
+		ItemToAttach->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, Socket);
+	}
+}
+
+void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem)
+{
+	if(!IsValid(CurrentItem) && IsValid(NewItem))
+	{
+		CurrentItem = NewItem;
+		CurrentItem->SetOwner(this);
+		CurrentItem->OnEquip();
+	}
+}

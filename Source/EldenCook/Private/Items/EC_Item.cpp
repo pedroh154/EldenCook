@@ -9,6 +9,8 @@ AEC_Item::AEC_Item()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	SetActorEnableCollision(false);
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -23,5 +25,12 @@ void AEC_Item::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AEC_Item::OnEquip()
+{
+	MyPlayer = Cast<AEldenCookCharacter>(Owner);
+
+	MyPlayer->AttachItem(this);
 }
 

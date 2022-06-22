@@ -14,7 +14,10 @@ class ELDENCOOK_API AEC_SerializableIngredient : public AEC_Item
 protected:
 	UPROPERTY()
 	UTexture2D* HUDIcon;
+
+	UPROPERTY()
+	bool bCuts;
 	
 public:
-	virtual void Init(UTexture2D* NewHUDIcon);
+	virtual void Init(UTexture2D* NewHUDIcon, UStaticMesh* Mesh, bool NewCuts);
 };

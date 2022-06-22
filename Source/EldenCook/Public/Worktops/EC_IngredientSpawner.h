@@ -15,11 +15,18 @@ struct FIngredient : public FTableRowBase
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UTexture2D* HUDIcon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UStaticMesh* Mesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bCuts;
 };
 
 
@@ -30,15 +37,33 @@ class ELDENCOOK_API AEC_IngredientSpawner : public AEC_Worktop, public IEC_ItemS
 	
 public:
 	AEC_IngredientSpawner();
-
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
+	
+
+	virtual void SpawnItem() override;
+	
+	virtual void OnInteract() override;
+
+private:
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void Server_SpawnItem();
 
 protected:
 	UPROPERTY(EditAnywhere, Category="Settings")
 	FDataTableRowHandle IngredientToSpawn;
-
-	virtual void OnInteract() override;
-
-	virtual void SpawnItem() override;
 	
+	UPROPERTY(EditAnywhere, Category="Settings")
+	float IngredientSpawnCooldown;
+	
+private:
+	FTimerHandle IngredientSpawnCooldownDelegate;
+
+protected:
+	UPROPERTY(Replicated)
+	AEC_Item* CurrentSpawnedItem;
+
+private:
+	UPROPERTY(EditAnywhere, Meta = (MakeEditWidget = true))
+	FVector IngredientSpawnLocation;
 };

@@ -1,7 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma once
-
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "EldenCookCharacter.generated.h"
@@ -15,14 +12,7 @@ class AEldenCookCharacter : public ACharacter
 
 public:
 	AEldenCookCharacter();
-
-	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
-
-	/** Returns TopDownCameraComponent subobject **/
-	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
 private:
 	/** Top down camera */
@@ -40,5 +30,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Status")
 	AEC_Item* CurrentItem;
 	
+public:
+	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None);
+	virtual void SetCurrentItem(AEC_Item* NewItem);
+	
+	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	AEC_Item* GetCurrentItem() const { return CurrentItem; };
 };
 
