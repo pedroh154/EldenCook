@@ -23,6 +23,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
+	/** Camera boom positioning the camera above the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UEC_LineTraceInteractComponent* LineTraceInteractComponent;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Config|Player")
 	int32 HP;
