@@ -59,6 +59,22 @@ void AEldenCookCharacter::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
 }
 
+void AEldenCookCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &AEldenCookCharacter::InputInteract);
+}
+
+void AEldenCookCharacter::InputInteract()
+{
+}
+
+void AEldenCookCharacter::Interact()
+{
+	LineTraceInteractComponent->GetCurrentHit();
+}
+
 void AEldenCookCharacter::AttachItem(AEC_Item* ItemToAttach, const FName Socket)
 {
 	if(IsValid(ItemToAttach))

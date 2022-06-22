@@ -30,5 +30,8 @@ public:
 	bool bDrawDebug;
 
 protected:
-	FHitResult CurrentHit;	
+	FHitResult CurrentHit;
+	
+public:
+	FHitResult GetCurrentHit() { return CurrentHit; } const;
 };

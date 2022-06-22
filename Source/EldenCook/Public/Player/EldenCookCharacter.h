@@ -13,6 +13,11 @@ class AEldenCookCharacter : public ACharacter
 public:
 	AEldenCookCharacter();
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void InputInteract();
+
+	virtual void Interact();
 
 private:
 	/** Top down camera */
