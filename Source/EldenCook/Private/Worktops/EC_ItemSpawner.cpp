@@ -22,7 +22,7 @@ void AEC_ItemSpawner::BeginPlay()
 	//if multiplayer, only start the timer server-side
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		GetWorldTimerManager().SetTimer(ItemSpawnCooldownTimerManager, this, &AEC_ItemSpawner::SpawnItem, ItemSpawnCooldown, true, -1);
+		SpawnItem();
 	}
 }
 
@@ -33,7 +33,6 @@ void AEC_ItemSpawner::SpawnItem()
 	{
 		if(IsValid(CurrentSpawnedItem))
 		{
-			GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
 			return;
 		}
 	
@@ -81,7 +80,8 @@ void AEC_ItemSpawner::OnInteract()
 				//go to the hands of the first one that can pick it up
 				CurrChar->SetCurrentItem(CurrentSpawnedItem);
 				CurrentSpawnedItem = nullptr;
-				GetWorldTimerManager().UnPauseTimer(ItemSpawnCooldownTimerManager);
+				
+				GetWorldTimerManager().SetTimer(ItemSpawnCooldownTimerManager, this, &AEC_ItemSpawner::SpawnItem, ItemSpawnCooldown, true, -1.0f);
 			}
 		}
 	}

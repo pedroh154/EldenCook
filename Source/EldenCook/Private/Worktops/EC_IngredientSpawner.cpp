@@ -57,7 +57,7 @@ void AEC_IngredientSpawner::SpawnIngredient()
 			CurrentSpawnedItem = SpawnedIngredient;
 
 			//pause spawn timer until someone picks that ingredient up
-			if(IsValid(CurrentSpawnedItem)) GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
+			GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
 		}
 	}
 }
