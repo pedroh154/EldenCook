@@ -10,6 +10,8 @@ UCLASS(NotBlueprintable, NotPlaceable)
 class ELDENCOOK_API AEC_SerializableIngredient : public AEC_Item
 {
 	GENERATED_BODY()
+public:
+	AEC_SerializableIngredient();
 
 protected:
 	UPROPERTY()

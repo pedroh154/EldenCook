@@ -3,9 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EC_Worktop.h"
+#include "EC_ItemSpawner.h"
 #include "Engine/DataTable.h"
-#include "Interfaces/EC_ItemSpawnerInterface.h"
 #include "EC_IngredientSpawner.generated.h"
 
 class AEC_SerializableIngredient;
@@ -29,9 +28,11 @@ public:
 	bool bCuts;
 };
 
-
-UCLASS()
-class ELDENCOOK_API AEC_IngredientSpawner : public AEC_Worktop, public IEC_ItemSpawnerInterface
+//An EC_Item spawner specialized for EC_SerializableIngredients.
+//You can set a data table row handle and it will read the ingredients properties from a data table and serialize and EC_SerializableIngredient.
+//if no data table is set, it will fallback to the TSubClassOf system from EC_ItemSpawner. It then will act like a normal EC_ItemSpawner.
+UCLASS(Abstract)
+class ELDENCOOK_API AEC_IngredientSpawner : public AEC_ItemSpawner
 {
 	GENERATED_BODY()
 	
@@ -39,31 +40,18 @@ public:
 	AEC_IngredientSpawner();
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
-	
 
 	virtual void SpawnItem() override;
-	
-	virtual void OnInteract() override;
+	virtual void SpawnIngredient();
 
 private:
-	UFUNCTION(Server, Reliable, WithValidation)
-	virtual void Server_SpawnItem();
+	virtual bool CheckForDataTable();
+
+private:
+	bool bUseDataTable;
 
 protected:
 	UPROPERTY(EditAnywhere, Category="Settings")
 	FDataTableRowHandle IngredientToSpawn;
-	
-	UPROPERTY(EditAnywhere, Category="Settings")
-	float IngredientSpawnCooldown;
-	
-private:
-	FTimerHandle IngredientSpawnCooldownDelegate;
 
-protected:
-	UPROPERTY(Replicated)
-	AEC_Item* CurrentSpawnedItem;
-
-private:
-	UPROPERTY(EditAnywhere, Meta = (MakeEditWidget = true))
-	FVector IngredientSpawnLocation;
 };

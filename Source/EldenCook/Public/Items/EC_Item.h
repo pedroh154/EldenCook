@@ -6,19 +6,19 @@
 
 class AEldenCookCharacter;
 
+//An actor that will be attached to the player's hand or a worktop (CurrentItem* inside EC_Character)
 UCLASS(Abstract)
-class ELDENCOOK_API AEC_Item : public AActor
+class ELDENCOOK_API AEC_Item  : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AEC_Item();
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
+	
 	UPROPERTY(VisibleDefaultsOnly, Category="Components")
 	UStaticMeshComponent* MeshComponent;
 
@@ -26,8 +26,5 @@ protected:
 	AEldenCookCharacter* MyPlayer;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	virtual void OnEquip();
 };
