@@ -17,8 +17,8 @@ public:
 	virtual void BeginPlay() override;
 	
 	virtual void SpawnItem() override;
-	
-	virtual void OnInteract() override;
+
+	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
 
 protected:
 	UPROPERTY(EditAnywhere, Category=Settings)

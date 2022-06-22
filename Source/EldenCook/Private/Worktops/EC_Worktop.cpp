@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "EldenCook/Public/Worktops/EC_Worktop.h"
 #include "Components/BoxComponent.h"
@@ -13,14 +11,13 @@ AEC_Worktop::AEC_Worktop()
 	PrimaryActorTick.bCanEverTick = true;
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	MeshComponent->SetCollisionProfileName(TEXT("Interactable"));
+	
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
-
 	BoxComponent->SetupAttachment(MeshComponent);
 	BoxComponent->SetBoxExtent(FVector(100.0f, 100.0f, 5.0f));
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &AEC_Worktop::OnBoxComponentBeginOverlap);
 	BoxComponent->OnComponentEndOverlap.AddDynamic(this, &AEC_Worktop::OnBoxComponentEndOverlap);
-
-	MeshComponent->SetCollisionProfileName(TEXT("Interactable"));
 }
 
 // Called when the game starts or when spawned
@@ -43,10 +40,8 @@ void AEC_Worktop::OnBoxComponentBeginOverlap(class UPrimitiveComponent* Overlapp
 	{
 		InteractingCharacters.Add(Char);
 
-		if(Cast<AEC_IngredientSpawner>(this))
-		{
-			Cast<AEC_IngredientSpawner>(this)->OnInteract();
-		}
+		if(Char->IsLocallyControlled())
+			ToggleInteractingMaterial();
 	}
 }
 
@@ -55,6 +50,41 @@ void AEC_Worktop::OnBoxComponentEndOverlap(UPrimitiveComponent* OverlappedCompon
 	if(AEldenCookCharacter* Char = Cast<AEldenCookCharacter>(OtherActor))
 	{
 		InteractingCharacters.Remove(Char);
+
+		if(Char->IsLocallyControlled())
+			ToggleInteractingMaterial();
 	}
+}
+
+bool AEC_Worktop::CanInteract(AEldenCookCharacter* InteractingChar)
+{
+	bool bIsInsideBoxCollision = false;
+	
+	for(int32 i = 0; i < InteractingCharacters.Num(); ++i)
+	{
+		bIsInsideBoxCollision = InteractingChar == InteractingCharacters[i];
+		if(bIsInsideBoxCollision) break;
+	}
+	
+	return IsValid(InteractingChar) && bIsInsideBoxCollision && GetLocalRole() == ROLE_Authority;
+}
+
+void AEC_Worktop::ToggleInteractingMaterial()
+{
+	const UStaticMesh* CurrMesh = MeshComponent->GetStaticMesh();
+
+	if(IsValid(CurrMesh) && IsValid(MaterialWhileInteracting))
+	{
+		if(MaterialWhileInteracting != CurrMesh->GetMaterial(0))
+		{
+			PreviousMaterial = CurrMesh->GetMaterial(0);
+			MeshComponent->GetStaticMesh()->SetMaterial(0, MaterialWhileInteracting);
+		}
+		else
+		{
+			MeshComponent->GetStaticMesh()->SetMaterial(0, PreviousMaterial);
+		}
+	}
+
 }
 

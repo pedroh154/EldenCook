@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EldenCook/Public/Items/EC_Item.h"
+#include "Interfaces/EC_InteractableInterface.h"
 #include "Player/EC_LineTraceInteractComponent.h"
 
 AEldenCookCharacter::AEldenCookCharacter()
@@ -68,11 +69,35 @@ void AEldenCookCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 void AEldenCookCharacter::InputInteract()
 {
+	if(GetLocalRole() < ROLE_Authority)
+	{
+		Server_Interact();
+	}
+	else
+	{
+		Interact();
+	}
 }
 
+//will run sv only by InputInteract()
 void AEldenCookCharacter::Interact()
 {
-	LineTraceInteractComponent->GetCurrentHit();
+	AActor* LineTraceHit = LineTraceInteractComponent->GetCurrentHit().GetActor();
+
+	if(IsValid(LineTraceHit) && LineTraceHit->Implements<UEC_InteractableInterface>())
+	{
+		Cast<IEC_InteractableInterface>(LineTraceHit)->OnInteract(this);
+	}
+}
+
+void AEldenCookCharacter::Server_Interact_Implementation()
+{
+	Interact();
+}
+
+bool AEldenCookCharacter::Server_Interact_Validate()
+{
+	return true;
 }
 
 void AEldenCookCharacter::AttachItem(AEC_Item* ItemToAttach, const FName Socket)

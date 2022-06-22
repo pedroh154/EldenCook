@@ -24,6 +24,10 @@ public:
 
 	UFUNCTION()
 	virtual void OnBoxComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
+
+	virtual void ToggleInteractingMaterial();
 	
 protected:
 	UPROPERTY(VisibleAnywhere, Category="Components")
@@ -32,10 +36,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	UBoxComponent* BoxComponent;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, Category="Status")
 	TArray<AEldenCookCharacter*> InteractingCharacters;
 
-public:	
-	// Called every frame
+	UPROPERTY(EditAnywhere, Category=Settings)
+	UMaterialInstance* MaterialWhileInteracting;
+
+private:
+	UPROPERTY()
+	UMaterialInterface* PreviousMaterial;
 	
 };

@@ -33,5 +33,5 @@ protected:
 	FHitResult CurrentHit;
 	
 public:
-	FHitResult GetCurrentHit() { return CurrentHit; } const;
+	FHitResult GetCurrentHit() { return CurrentHit; };
 };

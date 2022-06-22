@@ -3,6 +3,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/EldenCookCharacter.h"
+#include "Components/BoxComponent.h"
 
 AEC_ItemSpawner::AEC_ItemSpawner()
 {
@@ -28,7 +29,7 @@ void AEC_ItemSpawner::BeginPlay()
 
 void AEC_ItemSpawner::SpawnItem()
 {
-	//do it only server side, item will replicate back to clients
+	//do it only server side, item will replicate to clients
 	if(GetLocalRole() == ROLE_Authority)
 	{
 		if(IsValid(CurrentSpawnedItem))
@@ -63,27 +64,19 @@ void AEC_ItemSpawner::SpawnItem()
 	}
 }
 
-void AEC_ItemSpawner::OnInteract()
+void AEC_ItemSpawner::OnInteract(AEldenCookCharacter* InteractingChar)
 {
-	Super::OnInteract();
-
-	//if we have a spawned item waiting to be picked
-	if(IsValid(CurrentSpawnedItem))
+	//checks if InteractingChar is inside InteractingCharacters array
+	if(IsValid(InteractingChar) && CanInteract(InteractingChar))
 	{
-		//check if any interacting characters can pick it
-		for(int32 i = 0; i < InteractingCharacters.Num(); ++i)
+		//if we have a spawned item waiting to be picked and the interacting char has no item in its hands
+		if(IsValid(CurrentSpawnedItem) && !InteractingChar->GetCurrentItem())
 		{
-			AEldenCookCharacter* CurrChar = InteractingCharacters[i];
-		
-			if(IsValid(CurrChar) && !CurrChar->GetCurrentItem())
-			{
-				//go to the hands of the first one that can pick it up
-				CurrChar->SetCurrentItem(CurrentSpawnedItem);
-				CurrentSpawnedItem = nullptr;
-				
-				GetWorldTimerManager().SetTimer(ItemSpawnCooldownTimerManager, this, &AEC_ItemSpawner::SpawnItem, ItemSpawnCooldown, true, -1.0f);
-			}
+			//go to the hands
+			InteractingChar->SetCurrentItem(CurrentSpawnedItem);
+			CurrentSpawnedItem = nullptr;
+			
+			GetWorldTimerManager().SetTimer(ItemSpawnCooldownTimerManager, this, &AEC_ItemSpawner::SpawnItem, ItemSpawnCooldown, true, -1.0f);
 		}
 	}
 }
-
