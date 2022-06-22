@@ -17,7 +17,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	FHitResult* PerformTrace() const;
+	FHitResult PerformTrace() const;
 
 public:
 	UPROPERTY(EditAnywhere, Category=Settings)
@@ -25,4 +25,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category=Settings)
 	TEnumAsByte<ECollisionChannel> TraceCollisionChannel;
+
+	UPROPERTY(EditAnywhere, Category=Settings)
+	bool bDrawDebug;
+
+protected:
+	FHitResult CurrentHit;	
 };

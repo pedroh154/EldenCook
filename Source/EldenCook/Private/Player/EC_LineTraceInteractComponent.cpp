@@ -1,5 +1,7 @@
 #include "Player/EC_LineTraceInteractComponent.h"
 
+#include "EldenCook/EldenCook.h"
+
 // Sets default values for this component's properties
 UEC_LineTraceInteractComponent::UEC_LineTraceInteractComponent()
 {
@@ -8,7 +10,8 @@ UEC_LineTraceInteractComponent::UEC_LineTraceInteractComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	TraceDistanceMultiplier = 1000.0f;
-	TraceCollisionChannel = ECollisionChannel::ECC_WorldDynamic;
+	TraceCollisionChannel = ECC_WorldStatic;
+	bDrawDebug = false;
 }
 
 void UEC_LineTraceInteractComponent::BeginPlay()
@@ -19,20 +22,28 @@ void UEC_LineTraceInteractComponent::BeginPlay()
 void UEC_LineTraceInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	DrawDebugLine(GetWorld(), GetComponentLocation(), GetComponentLocation() + (GetForwardVector() * 1000.0f), FColor::Red, false, 0.05f, 0, .5f);
+	CurrentHit = PerformTrace();
 }
 
-FHitResult* UEC_LineTraceInteractComponent::PerformTrace() const
+FHitResult UEC_LineTraceInteractComponent::PerformTrace() const
 {
-	FHitResult* HitResult = nullptr;
+	FHitResult Temp;
 	
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.bDebugQuery = true;
 
 	const FCollisionResponseParams CollisionResponseParams;
 	
-	GetWorld()->LineTraceSingleByChannel(*HitResult, GetComponentLocation(),
+	GetWorld()->LineTraceSingleByChannel(Temp, GetComponentLocation(),
 		GetComponentLocation() + (GetForwardVector() * TraceDistanceMultiplier), TraceCollisionChannel, CollisionQueryParams, CollisionResponseParams);
 
-	return HitResult;
+	if(bDrawDebug)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.02f, FColor::Black,
+		FString::Printf(TEXT("hit: %s"), Temp.GetComponent() ? *Temp.GetComponent()->GetName() : TEXT("")));
+
+		DrawDebugLine(GetWorld(), GetComponentLocation(), GetComponentLocation() + (GetForwardVector() * 1000.0f), FColor::Red, false, 0.05f, 0, .5f);
+	}
+	
+	return Temp;
 }
