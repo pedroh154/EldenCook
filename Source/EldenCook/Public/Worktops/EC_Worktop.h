@@ -27,7 +27,6 @@ public:
 
 	/* interactable interface */
 	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
-	virtual void OnInteract() override;
 	virtual void OnHighlighted(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnUnhilighted(AEldenCookCharacter* InteractingChar) override;
 	/* interactable interface */

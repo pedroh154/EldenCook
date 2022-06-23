@@ -17,12 +17,18 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void InputInteract();
-
 	virtual void Interact();
 
 private:
 	UFUNCTION(Server, Reliable, WithValidation)
 	virtual void Server_Interact();
+
+public:
+	virtual void SetCurrentItem(AEC_Item* NewItem);
+	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None);
+	
+	UFUNCTION()
+	virtual void OnLineTraceHighlight(AActor* Hit, AActor* Last);
 
 private:
 	/** Top down camera */
@@ -45,11 +51,6 @@ protected:
 	AEC_Item* CurrentItem;
 	
 public:
-	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None);
-	virtual void SetCurrentItem(AEC_Item* NewItem);
-	UFUNCTION()
-	virtual void OnLineTraceHighlight(AActor* Hit, AActor* Last);
-	
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	AEC_Item* GetCurrentItem() const { return CurrentItem; };

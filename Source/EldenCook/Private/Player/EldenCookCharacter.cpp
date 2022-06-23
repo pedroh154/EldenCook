@@ -59,11 +59,6 @@ AEldenCookCharacter::AEldenCookCharacter()
 inline void AEldenCookCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if(IsLocallyControlled())
-	{
-		
-	}
 }
 
 void AEldenCookCharacter::Tick(float DeltaSeconds)
@@ -74,7 +69,6 @@ void AEldenCookCharacter::Tick(float DeltaSeconds)
 void AEldenCookCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 	PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &AEldenCookCharacter::InputInteract);
 }
 
@@ -111,6 +105,24 @@ bool AEldenCookCharacter::Server_Interact_Validate()
 	return true;
 }
 
+void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem)
+{
+	if(!IsValid(CurrentItem) && IsValid(NewItem))
+	{
+		CurrentItem = NewItem;
+		CurrentItem->SetOwner(this);
+		CurrentItem->OnEquip();
+	}
+}
+
+void AEldenCookCharacter::AttachItem(AEC_Item* ItemToAttach, const FName Socket)
+{
+	if(IsValid(ItemToAttach))
+	{
+		ItemToAttach->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, Socket);
+	}
+}
+
 void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)
 {
 	if(IsValid(Hit))
@@ -124,22 +136,5 @@ void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)
 	}
 }
 
-void AEldenCookCharacter::AttachItem(AEC_Item* ItemToAttach, const FName Socket)
-{
-	if(IsValid(ItemToAttach))
-	{
-		ItemToAttach->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, Socket);
-	}
-}
-
-void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem)
-{
-	if(!IsValid(CurrentItem) && IsValid(NewItem))
-	{
-		CurrentItem = NewItem;
-		CurrentItem->SetOwner(this);
-		CurrentItem->OnEquip();
-	}
-}
 
 
