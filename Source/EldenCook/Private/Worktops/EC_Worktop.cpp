@@ -44,13 +44,21 @@ bool AEC_Worktop::CanInteract(AEldenCookCharacter* InteractingChar)
 void AEC_Worktop::OnHighlighted(AEldenCookCharacter* InteractingChar)
 {
 	InteractingCharacters.Add(InteractingChar);
-	SetInteractingMaterial();
+
+	if(InteractingChar->IsLocallyControlled())
+	{
+		SetInteractingMaterial();
+	}
 }
 
 void AEC_Worktop::OnUnhilighted(AEldenCookCharacter* InteractingChar)
 {
 	InteractingCharacters.Remove(InteractingChar);
-	RemoveInteractingMaterial();
+
+	if(InteractingChar->IsLocallyControlled())
+	{
+		RemoveInteractingMaterial();
+	}
 }
 
 void AEC_Worktop::SetInteractingMaterial()
