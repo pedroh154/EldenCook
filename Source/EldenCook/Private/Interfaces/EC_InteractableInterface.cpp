@@ -1,8 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Interfaces/EC_InteractableInterface.h"
-
 #include "Player/EldenCookCharacter.h"
 
 void IEC_InteractableInterface::OnHighlighted(AEldenCookCharacter* InteractingChar)

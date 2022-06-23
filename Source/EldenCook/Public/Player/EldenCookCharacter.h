@@ -1,7 +1,9 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/EC_InteractableInterface.h"
 #include "EldenCookCharacter.generated.h"
+
 
 class AEC_Item;
 
@@ -15,20 +17,33 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
 	virtual void InputInteract();
-	virtual void Interact();
-
+	virtual void Interact(IEC_InteractableInterface* Interactable);
+	virtual void OnInteract(IEC_InteractableInterface* Interactable);
 private:
-	UFUNCTION(Server, Reliable, WithValidation)
-	virtual void Server_Interact();
+	//for some reason setting IEC_InteractableInterface type didn't work for RPC so we receive the actor and cast it
+	UFUNCTION(Server, Reliable)
+	virtual void Server_Interact(AActor* Interactable);
 
 public:
+	virtual void EquipItem(AEC_Item* Item);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void Server_EquipItem(AEC_Item* Item);
+
+private:
 	virtual void SetCurrentItem(AEC_Item* NewItem);
+
+public:
 	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None);
 	
 	UFUNCTION()
 	virtual void OnLineTraceHighlight(AActor* Hit, AActor* Last);
+
+	UFUNCTION()
+	virtual void OnRep_CurrentItem();
 
 private:
 	/** Top down camera */
@@ -47,7 +62,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Config|Player")
 	int32 HP;
 
-	UPROPERTY(VisibleAnywhere, Category="Status")
+	UPROPERTY(VisibleAnywhere, Category="Status", ReplicatedUsing=OnRep_CurrentItem)
 	AEC_Item* CurrentItem;
 	
 public:

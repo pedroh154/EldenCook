@@ -38,7 +38,7 @@ void AEC_Worktop::Tick(float DeltaTime)
 
 bool AEC_Worktop::CanInteract(AEldenCookCharacter* InteractingChar)
 {
-	return IsValid(InteractingChar) && GetLocalRole() == ROLE_Authority;
+	return IsValid(InteractingChar);
 }
 
 void AEC_Worktop::OnHighlighted(AEldenCookCharacter* InteractingChar)
@@ -50,7 +50,7 @@ void AEC_Worktop::OnHighlighted(AEldenCookCharacter* InteractingChar)
 void AEC_Worktop::OnUnhilighted(AEldenCookCharacter* InteractingChar)
 {
 	InteractingCharacters.Remove(InteractingChar);
-	SetInteractingMaterial();
+	RemoveInteractingMaterial();
 }
 
 void AEC_Worktop::SetInteractingMaterial()

@@ -18,8 +18,17 @@ public:
 	
 	virtual void SpawnItem() override;
 
+	/* Interactable Interface */
+	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
+	/* Interactable Interface */
 
+	UFUNCTION(BlueprintNativeEvent, Category=Spawn)
+	void PlaySpawnFX();
+
+	UFUNCTION()
+	virtual void OnRep_CurrentSpawnedItem();
+	
 protected:
 	UPROPERTY(EditAnywhere, Category=Settings)
 	TSubclassOf<AEC_Item> ItemToSpawnClass;
@@ -30,9 +39,16 @@ protected:
 	UPROPERTY(EditAnywhere, Meta = (MakeEditWidget = true))
 	FVector ItemSpawnLocation;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing=OnRep_CurrentSpawnedItem)
 	AEC_Item* CurrentSpawnedItem;
 
 	FTimerHandle ItemSpawnCooldownTimerManager;
+
+	UPROPERTY(EditAnywhere, Category="Settings|FX")
+	TArray<UParticleSystem*> ItemSpawnFX;
+
+	UPROPERTY(EditAnywhere, Category="Settings|FX")
+	TArray<USoundBase*> ItemSpawnSFX;
 	
 };
+

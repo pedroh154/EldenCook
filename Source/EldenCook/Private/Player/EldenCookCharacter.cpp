@@ -8,8 +8,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EldenCook/Public/Items/EC_Item.h"
-#include "Interfaces/EC_InteractableInterface.h"
 #include "Player/EC_LineTraceInteractComponent.h"
+#include "Interfaces/EC_InteractableInterface.h"
+#include "Net/UnrealNetwork.h"
 
 AEldenCookCharacter::AEldenCookCharacter()
 {
@@ -72,35 +73,73 @@ void AEldenCookCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &AEldenCookCharacter::InputInteract);
 }
 
+void AEldenCookCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AEldenCookCharacter, CurrentItem)
+}
+
 void AEldenCookCharacter::InputInteract()
 {
+	//when Interact button is pressed, check if we are hitting an interactable
+	AActor* LineTraceCompActor = LineTraceInteractComponent->GetCurrentHit().GetActor();
+	IEC_InteractableInterface* Interactable = Cast<IEC_InteractableInterface>(LineTraceCompActor);
+
+	//if we are, proceed with interact
+	if(Interactable) Interact(Interactable);
+}
+
+void AEldenCookCharacter::Interact(IEC_InteractableInterface* Interactable)
+{
+	//if we are client, send rpc to server with the Interactable we are hitting client-side
 	if(GetLocalRole() < ROLE_Authority)
 	{
-		Server_Interact();
+		Server_Interact(Cast<AActor>(Interactable));
 	}
+	//if we are server, call OnInteract already
 	else
 	{
-		Interact();
+		OnInteract(Interactable);
 	}
 }
 
-//will run sv only by InputInteract()
-void AEldenCookCharacter::Interact()
+void AEldenCookCharacter::OnInteract(IEC_InteractableInterface* Interactable)
 {
-	AActor* LineTraceHit = LineTraceInteractComponent->GetCurrentHit().GetActor();
+	const IEC_InteractableInterface* LineTraceHit = Cast<IEC_InteractableInterface>(LineTraceInteractComponent->GetCurrentHit().GetActor());
 
-	if(IsValid(LineTraceHit) && LineTraceHit->Implements<UEC_InteractableInterface>())
+	//check if the LineTrace is actually hitting the Interactable (for client sent rpc)
+	if(LineTraceHit == Interactable)
 	{
-		Cast<IEC_InteractableInterface>(LineTraceHit)->OnInteract(this);
+		Interactable->OnInteract(this);
 	}
 }
 
-void AEldenCookCharacter::Server_Interact_Implementation()
+void AEldenCookCharacter::Server_Interact_Implementation(AActor* Interactable)
 {
-	Interact();
+	OnInteract(Cast<IEC_InteractableInterface>(Interactable));
 }
 
-bool AEldenCookCharacter::Server_Interact_Validate()
+void AEldenCookCharacter::EquipItem(AEC_Item* Item)
+{
+	if(IsValid(Item))
+	{
+		if(GetLocalRole() == ROLE_Authority)
+		{
+			SetCurrentItem(Item);
+		}
+		else
+		{
+			Server_EquipItem(Item);
+		}
+	}
+}
+
+void AEldenCookCharacter::Server_EquipItem_Implementation(AEC_Item* Item)
+{
+	EquipItem(Item);
+}
+
+bool AEldenCookCharacter::Server_EquipItem_Validate(AEC_Item* Item)
 {
 	return true;
 }
@@ -134,6 +173,11 @@ void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)
 	{
 		Cast<IEC_InteractableInterface>(Last)->OnUnhilighted(this);
 	}
+}
+
+void AEldenCookCharacter::OnRep_CurrentItem()
+{
+	SetCurrentItem(CurrentItem);
 }
 
 

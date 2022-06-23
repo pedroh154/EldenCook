@@ -58,6 +58,12 @@ void AEC_IngredientSpawner::SpawnIngredient()
 
 			//pause spawn timer until someone picks that ingredient up
 			GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
+
+			//play spawn fx if listen server; will also play on client on OnRep_CurrentSpawnedItem
+			if(GetNetMode() == NM_ListenServer)
+			{
+				PlaySpawnFX();
+			}
 		}
 	}
 }
