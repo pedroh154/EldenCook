@@ -49,10 +49,21 @@ AEldenCookCharacter::AEldenCookCharacter()
 	//Create a line trace interact component
 	LineTraceInteractComponent = CreateDefaultSubobject<UEC_LineTraceInteractComponent>(TEXT("LineTraceInteractComponent"));
 	LineTraceInteractComponent->SetupAttachment(GetMesh());
-	LineTraceInteractComponent->TraceDistanceMultiplier = 50000.0f;
+	LineTraceInteractComponent->TraceDistanceMultiplier = 100.0f;
 	LineTraceInteractComponent->TraceCollisionChannel = COLLISION_INTERACTABLE;
+	LineTraceInteractComponent->NewHitActorDelegate.AddDynamic(this, &AEldenCookCharacter::OnLineTraceHighlight);
 
 	HP = 3;
+}
+
+inline void AEldenCookCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if(IsLocallyControlled())
+	{
+		
+	}
 }
 
 void AEldenCookCharacter::Tick(float DeltaSeconds)
@@ -100,6 +111,19 @@ bool AEldenCookCharacter::Server_Interact_Validate()
 	return true;
 }
 
+void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)
+{
+	if(IsValid(Hit))
+	{
+		Cast<IEC_InteractableInterface>(Hit)->OnHighlighted(this);
+	}
+
+	if(IsValid(Last))
+	{
+		Cast<IEC_InteractableInterface>(Last)->OnUnhilighted(this);
+	}
+}
+
 void AEldenCookCharacter::AttachItem(AEC_Item* ItemToAttach, const FName Socket)
 {
 	if(IsValid(ItemToAttach))
@@ -117,3 +141,5 @@ void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem)
 		CurrentItem->OnEquip();
 	}
 }
+
+

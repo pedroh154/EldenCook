@@ -5,6 +5,14 @@
 
 #include "Player/EldenCookCharacter.h"
 
+void IEC_InteractableInterface::OnHighlighted(AEldenCookCharacter* InteractingChar)
+{
+}
+
+void IEC_InteractableInterface::OnUnhilighted(AEldenCookCharacter* InteractingChar)
+{
+}
+
 void IEC_InteractableInterface::OnInteract()
 {
 }

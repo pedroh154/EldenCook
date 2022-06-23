@@ -13,6 +13,7 @@ class AEldenCookCharacter : public ACharacter
 public:
 	AEldenCookCharacter();
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void InputInteract();
@@ -46,9 +47,13 @@ protected:
 public:
 	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None);
 	virtual void SetCurrentItem(AEC_Item* NewItem);
+	UFUNCTION()
+	virtual void OnLineTraceHighlight(AActor* Hit, AActor* Last);
 	
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	AEC_Item* GetCurrentItem() const { return CurrentItem; };
 };
+
+
 

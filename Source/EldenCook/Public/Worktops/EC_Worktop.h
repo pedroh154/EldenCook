@@ -19,15 +19,21 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION()
-	virtual void OnBoxComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	// UFUNCTION()
+	// virtual void OnBoxComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	//
+	// UFUNCTION()
+	// virtual void OnBoxComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	UFUNCTION()
-	virtual void OnBoxComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
+	/* interactable interface */
 	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
-
-	virtual void ToggleInteractingMaterial();
+	virtual void OnInteract() override;
+	virtual void OnHighlighted(AEldenCookCharacter* InteractingChar) override;
+	virtual void OnUnhilighted(AEldenCookCharacter* InteractingChar) override;
+	/* interactable interface */
+	
+	virtual void SetInteractingMaterial();
+	virtual void RemoveInteractingMaterial();
 	
 protected:
 	UPROPERTY(VisibleAnywhere, Category="Components")

@@ -1,7 +1,5 @@
 #include "Player/EC_LineTraceInteractComponent.h"
 
-#include "EldenCook/EldenCook.h"
-
 // Sets default values for this component's properties
 UEC_LineTraceInteractComponent::UEC_LineTraceInteractComponent()
 {
@@ -22,28 +20,35 @@ void UEC_LineTraceInteractComponent::BeginPlay()
 void UEC_LineTraceInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	CurrentHit = PerformTrace();
+	PerformTrace();
 }
 
-FHitResult UEC_LineTraceInteractComponent::PerformTrace() const
+void UEC_LineTraceInteractComponent::PerformTrace()
 {
+	//perform line trace and store it here
 	FHitResult Temp;
 	
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.bDebugQuery = true;
-
 	const FCollisionResponseParams CollisionResponseParams;
 	
 	GetWorld()->LineTraceSingleByChannel(Temp, GetComponentLocation(),
 		GetComponentLocation() + (GetForwardVector() * TraceDistanceMultiplier), TraceCollisionChannel, CollisionQueryParams, CollisionResponseParams);
 
+	//get actor hit by line trace
+	AActor* HitActor = Temp.GetActor();
+
+	//if its a different actor compared to last frame, broadcast delegate (even if nullptr)
+	if(CurrentHit.GetActor() != HitActor) NewHitActorDelegate.Broadcast(HitActor, CurrentHit.GetActor());
+
+	//update CurrentHit
+	CurrentHit = Temp;
+
 	if(bDrawDebug)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.02f, FColor::Black,
-		FString::Printf(TEXT("hit: %s"), Temp.GetComponent() ? *Temp.GetComponent()->GetName() : TEXT("")));
+		//GEngine->AddOnScreenDebugMessage(-1, 0.02f, FColor::Black,
+		//FString::Printf(TEXT("hit: %s"), Temp.GetComponent() ? *Temp.GetComponent()->GetName() : TEXT("")));
 
-		DrawDebugLine(GetWorld(), GetComponentLocation(), GetComponentLocation() + (GetForwardVector() * 1000.0f), FColor::Red, false, 0.05f, 0, .5f);
+		DrawDebugLine(GetWorld(), GetComponentLocation(), GetComponentLocation() + (GetForwardVector() * TraceDistanceMultiplier), FColor::Red, false, 0.05f, 0, .5f);
 	}
-	
-	return Temp;
 }
