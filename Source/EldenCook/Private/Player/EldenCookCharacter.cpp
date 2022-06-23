@@ -54,12 +54,15 @@ AEldenCookCharacter::AEldenCookCharacter()
 	LineTraceInteractComponent->TraceCollisionChannel = COLLISION_INTERACTABLE;
 	LineTraceInteractComponent->NewHitActorDelegate.AddDynamic(this, &AEldenCookCharacter::OnLineTraceHighlight);
 
+	bReplicates = true;
+
 	HP = 3;
 }
 
 inline void AEldenCookCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	SetReplicateMovement(true);
 }
 
 void AEldenCookCharacter::Tick(float DeltaSeconds)
@@ -220,14 +223,17 @@ void AEldenCookCharacter::DetachCurrentItem()
 
 void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)
 {
-	if(IsValid(Hit))
+	IEC_InteractableInterface* HitInteractable = Cast<IEC_InteractableInterface>(Hit);
+	IEC_InteractableInterface* LastInteractable = Cast<IEC_InteractableInterface>(Last);
+	
+	if(HitInteractable)
 	{
-		Cast<IEC_InteractableInterface>(Hit)->OnHighlighted(this);
+		HitInteractable->OnHighlighted(this);
 	}
 
-	if(IsValid(Last))
+	if(LastInteractable)
 	{
-		Cast<IEC_InteractableInterface>(Last)->OnUnhilighted(this);
+		LastInteractable->OnUnhilighted(this);
 	}
 }
 
