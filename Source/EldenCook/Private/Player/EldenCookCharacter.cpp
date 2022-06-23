@@ -71,6 +71,7 @@ void AEldenCookCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &AEldenCookCharacter::InputInteract);
+	PlayerInputComponent->BindAction(TEXT("DropItem"), IE_Pressed, this, &AEldenCookCharacter::InputDropItem);
 }
 
 void AEldenCookCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -144,13 +145,61 @@ bool AEldenCookCharacter::Server_EquipItem_Validate(AEC_Item* Item)
 	return true;
 }
 
+void AEldenCookCharacter::InputDropItem()
+{
+	if(CurrentItem)
+	{
+		DropItem();
+	}
+}
+
+void AEldenCookCharacter::DropItem()
+{
+	if(IsValid(CurrentItem))
+	{
+		if(GetLocalRole() == ROLE_Authority)
+		{
+			OnDropItem();
+		}
+		else
+		{
+			Server_DropItem();
+		}
+	}
+}
+
+void AEldenCookCharacter::Server_DropItem_Implementation()
+{
+	OnDropItem();
+}
+
+bool AEldenCookCharacter::Server_DropItem_Validate()
+{
+	return true;
+}
+
+void AEldenCookCharacter::OnDropItem()
+{
+	SetCurrentItem(nullptr);
+}
+
 void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem)
 {
+	//equipping
 	if(!IsValid(CurrentItem) && IsValid(NewItem))
 	{
+		AttachItem(NewItem);
 		CurrentItem = NewItem;
 		CurrentItem->SetOwner(this);
 		CurrentItem->OnEquip();
+	}
+	//dropping
+	else if(CurrentItem && !NewItem)
+	{
+		DetachCurrentItem();
+		CurrentItem->OnUnequip();
+		CurrentItem->SetOwner(nullptr);
+		CurrentItem = nullptr;
 	}
 }
 
@@ -160,6 +209,13 @@ void AEldenCookCharacter::AttachItem(AEC_Item* ItemToAttach, const FName Socket)
 	{
 		ItemToAttach->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, Socket);
 	}
+}
+
+void AEldenCookCharacter::DetachCurrentItem()
+{
+	const FDetachmentTransformRules Rules(EDetachmentRule::KeepWorld, true);
+	CurrentItem->DetachFromActor(Rules);
+	CurrentItem->GetMeshComponent()->SetSimulatePhysics(true);
 }
 
 void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)

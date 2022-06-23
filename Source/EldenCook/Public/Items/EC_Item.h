@@ -23,9 +23,13 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category="Components", Replicated)
 	UStaticMeshComponent* MeshComponent;
 
+protected:
 	UPROPERTY(VisibleAnywhere, Category="Status")
 	AEldenCookCharacter* MyPlayer;
 
 public:	
 	virtual void OnEquip();
+	virtual void OnUnequip();
+
+	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }
 };

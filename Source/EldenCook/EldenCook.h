@@ -6,4 +6,5 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogEldenCook, Log, All);
 
+#define COLLISION_ITEM ECC_GameTraceChannel1
 #define COLLISION_INTERACTABLE ECC_GameTraceChannel2
