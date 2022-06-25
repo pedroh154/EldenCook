@@ -85,7 +85,7 @@ protected:
 
 	/** Camera boom positioning the camera above the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UEC_LineTraceInteractComponent* LineTraceInteractComponent;
+	class UEC_InteractComponent* LineTraceInteractComponent;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Config|Player")
 	int32 HP;

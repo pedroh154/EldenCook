@@ -8,7 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EldenCook/Public/Items/EC_Item.h"
-#include "Player/EC_LineTraceInteractComponent.h"
+#include "Player/EC_InteractComponent.h"
 #include "Interfaces/EC_InteractableInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -49,7 +49,7 @@ AEldenCookCharacter::AEldenCookCharacter()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	//Create a line trace interact component
-	LineTraceInteractComponent = CreateDefaultSubobject<UEC_LineTraceInteractComponent>(TEXT("LineTraceInteractComponent"));
+	LineTraceInteractComponent = CreateDefaultSubobject<UEC_InteractComponent>(TEXT("LineTraceInteractComponent"));
 	LineTraceInteractComponent->SetupAttachment(GetMesh());
 	LineTraceInteractComponent->TraceDistanceMultiplier = 100.0f;
 	LineTraceInteractComponent->TraceCollisionChannel = COLLISION_INTERACTABLE;

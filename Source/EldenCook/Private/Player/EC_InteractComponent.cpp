@@ -1,8 +1,8 @@
-#include "Player/EC_LineTraceInteractComponent.h"
+#include "Player/EC_InteractComponent.h"
 #include "EldenCook/EldenCook.h"
 #include "Interfaces/EC_InteractableInterface.h"
 
-UEC_LineTraceInteractComponent::UEC_LineTraceInteractComponent()
+UEC_InteractComponent::UEC_InteractComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	TraceDistanceMultiplier = 1000.0f;
@@ -10,18 +10,18 @@ UEC_LineTraceInteractComponent::UEC_LineTraceInteractComponent()
 	bDrawDebug = false;
 }
 
-void UEC_LineTraceInteractComponent::BeginPlay()
+void UEC_InteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-void UEC_LineTraceInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UEC_InteractComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	PerformTrace();
 }
 
-void UEC_LineTraceInteractComponent::PerformTrace()
+void UEC_InteractComponent::PerformTrace()
 {
 	//perform line trace and store it here
 	FHitResult Temp;
@@ -47,11 +47,11 @@ void UEC_LineTraceInteractComponent::PerformTrace()
 		GEngine->AddOnScreenDebugMessage(-1, 0.02f, FColor::Black,
 		FString::Printf(TEXT("LINE TRACE DEBUG HIT: %s"), Temp.GetComponent() ? *Temp.GetComponent()->GetName() : TEXT("")));
 
-		DrawDebugLine(GetWorld(), GetComponentLocation(), GetComponentLocation() + (GetForwardVector() * TraceDistanceMultiplier), FColor::Red, false, 0.05f, 0, .5f);
+		DrawDebugLine(GetWorld(), GetComponentLocation(), GetComponentLocation() + (GetForwardVector() * TraceDistanceMultiplier), FColor::Red, false, 0.05f, 0, 2.f);
 	}
 }
 
-IEC_InteractableInterface* UEC_LineTraceInteractComponent::GetCurrentHitInteractable()
+IEC_InteractableInterface* UEC_InteractComponent::GetCurrentHitInteractable()
 {
 	return Cast<IEC_InteractableInterface>(GetCurrentHit().GetActor());
 }

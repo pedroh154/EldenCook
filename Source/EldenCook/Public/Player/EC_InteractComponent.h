@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "EC_LineTraceInteractComponent.generated.h"
+#include "EC_InteractComponent.generated.h"
 
 class IEC_InteractableInterface;
 
@@ -10,12 +10,12 @@ class IEC_InteractableInterface;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FNewActorHit, class AActor*, NewHit, AActor*, Last);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class ELDENCOOK_API UEC_LineTraceInteractComponent : public USceneComponent
+class ELDENCOOK_API UEC_InteractComponent : public USceneComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UEC_LineTraceInteractComponent();
+	UEC_InteractComponent();
 
 protected:
 	virtual void BeginPlay() override;
