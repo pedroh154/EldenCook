@@ -39,6 +39,11 @@ void AEC_IngredientSpawner::SpawnIngredient()
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
+		if(IsValid(CurrentItem))
+		{
+			return;
+		}
+		
 		//find the ingredient corresponding to this spawner
 		const FIngredient* RowStruct = IngredientToSpawn.DataTable->FindRow<FIngredient>(IngredientToSpawn.RowName, TEXT(""));
 

@@ -1,4 +1,6 @@
 #include "EldenCook/Public/Player/EldenCookCharacter.h"
+
+#include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -58,7 +60,7 @@ AEldenCookCharacter::AEldenCookCharacter()
 	HP = 3;
 }
 
-inline void AEldenCookCharacter::BeginPlay()
+void AEldenCookCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	SetReplicateMovement(true);

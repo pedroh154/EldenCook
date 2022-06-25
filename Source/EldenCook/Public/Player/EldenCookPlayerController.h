@@ -18,6 +18,10 @@ class AEldenCookPlayerController : public APlayerController
 public:
 	AEldenCookPlayerController();
 
+	virtual void OnRep_Pawn() override;
+	
+	UFUNCTION()
+	virtual void SwitchToLevelCamera();
 	/** Time Threshold to know if it was a short press */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	float ShortPressThreshold;
@@ -25,6 +29,7 @@ public:
 	/** FX Class that we will spawn when clicking */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UNiagaraSystem* FXCursor;
+
 
 protected:
 	virtual void BeginPlay() override;

@@ -106,7 +106,7 @@ void AEC_ItemSpawner::OnInteract(AEldenCookCharacter* InteractingChar)
 			else if(!InteractingChar->GetCurrentItem() && CurrentItem)
 			{
 				Super::OnInteract(InteractingChar);
-				GetWorldTimerManager().UnPauseTimer(ItemSpawnCooldownTimerManager);
+				GetWorldTimerManager().SetTimer(ItemSpawnCooldownTimerManager, this, &AEC_ItemSpawner::SpawnItem, ItemSpawnCooldown, true, -1.0f);
 			}
 		}
 	}

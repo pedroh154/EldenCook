@@ -5,8 +5,10 @@
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Camera/CameraActor.h"
 #include "EldenCook/Public/Player/EldenCookCharacter.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 
 AEldenCookPlayerController::AEldenCookPlayerController()
 {
@@ -14,9 +16,32 @@ AEldenCookPlayerController::AEldenCookPlayerController()
 	DefaultMouseCursor = EMouseCursor::Default;
 }
 
+void AEldenCookPlayerController::SwitchToLevelCamera()
+{
+	if(IsLocalController())
+	{
+		//check if we have Level Camera set-up, if we do, set view target
+		TArray<AActor*> Cameras;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACameraActor::StaticClass(), Cameras);
+		
+		for(int32 i = 0; i < Cameras.Num(); ++i)
+		{
+			if(Cameras[i] && Cameras[i]->ActorHasTag(TEXT("Level")))
+			{
+				SetViewTarget(Cameras[i]);
+			}
+		}
+	}
+}
+
 void AEldenCookPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if(GetNetMode() == NM_ListenServer)
+	{
+		SwitchToLevelCamera(); //try switch to level camera. clients will switch OnRep_Pawn, bc pawn replication happens a few moments after begin play, putting it here wouldnt setviewtarget
+	}
 }
 
 void AEldenCookPlayerController::PlayerTick(float DeltaTime)
@@ -106,4 +131,10 @@ void AEldenCookPlayerController::OnTouchReleased(const ETouchIndex::Type FingerI
 {
 	bIsTouch = false;
 	OnSetDestinationReleased();
+}
+
+void AEldenCookPlayerController::OnRep_Pawn()
+{
+	Super::OnRep_Pawn();
+	SwitchToLevelCamera();
 }
