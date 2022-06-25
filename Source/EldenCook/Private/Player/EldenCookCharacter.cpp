@@ -110,7 +110,7 @@ void AEldenCookCharacter::Interact(IEC_InteractableInterface* Interactable)
 
 void AEldenCookCharacter::OnInteract(IEC_InteractableInterface* Interactable)
 {
-	const IEC_InteractableInterface* LineTraceHit = Cast<IEC_InteractableInterface>(LineTraceInteractComponent->GetCurrentHit().GetActor());
+	const IEC_InteractableInterface* LineTraceHit = Cast<IEC_InteractableInterface>(LineTraceInteractComponent->GetCurrentHitInteractable());
 
 	//check if the LineTrace is actually hitting the Interactable (for client sent rpc)
 	if(LineTraceHit == Interactable)
@@ -231,12 +231,12 @@ void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)
 	IEC_InteractableInterface* HitInteractable = Cast<IEC_InteractableInterface>(Hit);
 	IEC_InteractableInterface* LastInteractable = Cast<IEC_InteractableInterface>(Last);
 	
-	if(HitInteractable)
+	if(HitInteractable && HitInteractable != LastInteractable)
 	{
 		HitInteractable->OnHighlighted(this);
 	}
 
-	if(LastInteractable)
+	if(LastInteractable && HitInteractable != LastInteractable)
 	{
 		LastInteractable->OnUnhilighted(this);
 	}
