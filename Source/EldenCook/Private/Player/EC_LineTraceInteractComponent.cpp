@@ -1,5 +1,6 @@
 #include "Player/EC_LineTraceInteractComponent.h"
 #include "EldenCook/EldenCook.h"
+#include "Interfaces/EC_InteractableInterface.h"
 
 UEC_LineTraceInteractComponent::UEC_LineTraceInteractComponent()
 {
@@ -48,4 +49,9 @@ void UEC_LineTraceInteractComponent::PerformTrace()
 
 		DrawDebugLine(GetWorld(), GetComponentLocation(), GetComponentLocation() + (GetForwardVector() * TraceDistanceMultiplier), FColor::Red, false, 0.05f, 0, .5f);
 	}
+}
+
+IEC_InteractableInterface* UEC_LineTraceInteractComponent::GetCurrentHitInteractable()
+{
+	return Cast<IEC_InteractableInterface>(GetCurrentHit().GetActor());
 }

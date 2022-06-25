@@ -88,8 +88,7 @@ void AEldenCookCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 void AEldenCookCharacter::InputInteract()
 {
 	//when Interact button is pressed, check if we are hitting an interactable
-	AActor* LineTraceCompActor = LineTraceInteractComponent->GetCurrentHit().GetActor();
-	IEC_InteractableInterface* Interactable = Cast<IEC_InteractableInterface>(LineTraceCompActor);
+	IEC_InteractableInterface* Interactable = LineTraceInteractComponent->GetCurrentHitInteractable();
 
 	//if we are, proceed with interact
 	if(Interactable) Interact(Interactable);

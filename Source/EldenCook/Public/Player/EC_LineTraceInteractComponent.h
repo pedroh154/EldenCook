@@ -4,6 +4,8 @@
 #include "Components/SceneComponent.h"
 #include "EC_LineTraceInteractComponent.generated.h"
 
+class IEC_InteractableInterface;
+
 //broadcast whenever a new actor has been hit by raycast; broadcasts even if nullptr.
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FNewActorHit, class AActor*, NewHit, AActor*, Last);
 
@@ -41,4 +43,5 @@ protected:
 	
 public:
 	FHitResult GetCurrentHit() { return CurrentHit; };
+	IEC_InteractableInterface* GetCurrentHitInteractable();
 };
