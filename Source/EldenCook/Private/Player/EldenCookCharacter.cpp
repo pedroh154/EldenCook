@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "EldenCook/Public/Player/EldenCookCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
@@ -10,6 +8,7 @@
 #include "EldenCook/Public/Items/EC_Item.h"
 #include "Player/EC_LineTraceInteractComponent.h"
 #include "Interfaces/EC_InteractableInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 AEldenCookCharacter::AEldenCookCharacter()
@@ -193,15 +192,13 @@ void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem)
 	{
 		AttachItem(NewItem);
 		CurrentItem = NewItem;
-		CurrentItem->SetOwner(this);
-		CurrentItem->OnEquip();
+		CurrentItem->OnEquip(this);
 	}
 	//dropping
 	else if(CurrentItem && !NewItem)
 	{
 		DetachCurrentItem();
 		CurrentItem->OnUnequip();
-		CurrentItem->SetOwner(nullptr);
 		CurrentItem = nullptr;
 	}
 }
@@ -241,6 +238,5 @@ void AEldenCookCharacter::OnRep_CurrentItem()
 {
 	SetCurrentItem(CurrentItem);
 }
-
 
 

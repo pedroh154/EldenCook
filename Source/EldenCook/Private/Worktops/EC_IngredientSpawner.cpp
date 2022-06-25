@@ -43,7 +43,7 @@ void AEC_IngredientSpawner::SpawnIngredient()
 		const FIngredient* RowStruct = IngredientToSpawn.DataTable->FindRow<FIngredient>(IngredientToSpawn.RowName, TEXT(""));
 
 		//since IngredientSpawnLocation's location is in local space, convert it to world-space
-		const FVector WorldLoc = GetActorLocation() + ItemSpawnLocation;
+		const FVector WorldLoc = GetActorLocation() + ItemLocation;
 		
 		//spawn ingredient item
 		AEC_SerializableIngredient* SpawnedIngredient = Cast<AEC_SerializableIngredient>(UGameplayStatics::BeginDeferredActorSpawnFromClass(GetWorld(),
@@ -53,8 +53,12 @@ void AEC_IngredientSpawner::SpawnIngredient()
 		{
 			//serialize it and finish spawning it
 			SpawnedIngredient->Init(RowStruct->HUDIcon, RowStruct->Mesh, RowStruct->bCuts);
-			SpawnedIngredient->FinishSpawning(FTransform(WorldLoc));
-			CurrentSpawnedItem = SpawnedIngredient;
+			UGameplayStatics::FinishSpawningActor(SpawnedIngredient, FTransform(WorldLoc));
+			CurrentItem = SpawnedIngredient;
+			SpawnedIngredient->OnEnterWorktop(this);
+
+			//the spawned ingredient will be attached to the spawner, we dont want the player to be able to interact with the ingredient but with the spawner to grab it.
+			SpawnedIngredient->SetCurrentlyInteractable(false, SpawnedIngredient);
 
 			//pause spawn timer until someone picks that ingredient up
 			GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);

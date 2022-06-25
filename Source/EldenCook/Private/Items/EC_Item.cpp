@@ -1,6 +1,5 @@
 #include "EldenCook/Public/Items/EC_Item.h"
-
-#include "EldenCook/EldenCook.h"
+#include "Worktops/EC_Worktop.h"
 #include "EldenCook/Public/Player/EldenCookCharacter.h"
 #include "Net/UnrealNetwork.h"
 
@@ -10,10 +9,7 @@ AEC_Item::AEC_Item()
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->SetIsReplicated(true);
-	MeshComponent->SetCollisionProfileName(TEXT("EC_Item"));
-	MeshComponent->SetCollisionObjectType(COLLISION_ITEM);
-	
-	SetActorEnableCollision(false); //default no collision
+	MeshComponent->SetCollisionProfileName(TEXT("Interactable"));
 	
 	bReplicates = true;
 }
@@ -33,17 +29,43 @@ void AEC_Item::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AEC_Item::OnEquip()
+void AEC_Item::OnEquip(AEldenCookCharacter* Char)
 {
-	MyPlayer = Cast<AEldenCookCharacter>(Owner);
+	SetOwner(Char);
+	MyPlayer = Char;
 	SetActorEnableCollision(false);
+	MeshComponent->SetSimulatePhysics(false);
 }
 
 void AEC_Item::OnUnequip()
 {
 	SetActorEnableCollision(true);
-	MeshComponent->SetCollisionProfileName(TEXT("EC_Item"));
 	MeshComponent->AddForce(FVector(MyPlayer->GetActorForwardVector() * 1000.0f));
+	MeshComponent->SetSimulatePhysics(true);
+	SetOwner(nullptr);
 	MyPlayer = nullptr;
 }
+
+void AEC_Item::OnEnterWorktop(AEC_Worktop* Worktop)
+{
+	MyWorktop = Worktop;
+}
+
+void AEC_Item::OnLeaveWorktop()
+{
+	MyWorktop = nullptr;
+}
+
+void AEC_Item::OnInteract(AEldenCookCharacter* InteractingChar)
+{
+}
+
+bool AEC_Item::CanInteract(AEldenCookCharacter* InteractingChar)
+{
+	return true;
+}
+
+
+
+
 

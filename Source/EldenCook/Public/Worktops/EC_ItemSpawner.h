@@ -25,9 +25,8 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category=Spawn)
 	void PlaySpawnFX();
-
-	UFUNCTION()
-	virtual void OnRep_CurrentSpawnedItem();
+	
+	virtual void OnRep_CurrentItem() override;
 	
 protected:
 	UPROPERTY(EditAnywhere, Category=Settings)
@@ -36,12 +35,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Settings")
 	float ItemSpawnCooldown;
 
-	UPROPERTY(EditAnywhere, Meta = (MakeEditWidget = true))
-	FVector ItemSpawnLocation;
-
-	UPROPERTY(ReplicatedUsing=OnRep_CurrentSpawnedItem)
-	AEC_Item* CurrentSpawnedItem;
-
+	UPROPERTY(BlueprintReadOnly)
 	FTimerHandle ItemSpawnCooldownTimerManager;
 
 	UPROPERTY(EditAnywhere, Category="Settings|FX")

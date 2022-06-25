@@ -14,6 +14,11 @@ AEldenCookPlayerController::AEldenCookPlayerController()
 	DefaultMouseCursor = EMouseCursor::Default;
 }
 
+void AEldenCookPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void AEldenCookPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);

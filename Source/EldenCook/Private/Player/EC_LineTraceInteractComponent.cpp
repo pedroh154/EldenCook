@@ -46,8 +46,8 @@ void UEC_LineTraceInteractComponent::PerformTrace()
 
 	if(bDrawDebug)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 0.02f, FColor::Black,
-		//FString::Printf(TEXT("hit: %s"), Temp.GetComponent() ? *Temp.GetComponent()->GetName() : TEXT("")));
+		GEngine->AddOnScreenDebugMessage(-1, 0.02f, FColor::Black,
+		FString::Printf(TEXT("LINE TRACE DEBUG HIT: %s"), Temp.GetComponent() ? *Temp.GetComponent()->GetName() : TEXT("")));
 
 		DrawDebugLine(GetWorld(), GetComponentLocation(), GetComponentLocation() + (GetForwardVector() * TraceDistanceMultiplier), FColor::Red, false, 0.05f, 0, .5f);
 	}

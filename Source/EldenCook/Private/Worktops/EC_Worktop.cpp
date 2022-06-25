@@ -2,6 +2,8 @@
 #include "EldenCook/Public/Worktops/EC_Worktop.h"
 #include "Components/BoxComponent.h"
 #include "EldenCook/EldenCook.h"
+#include "Items/EC_Item.h"
+#include "Net/UnrealNetwork.h"
 #include "Player/EldenCookCharacter.h"
 #include "Worktops/EC_IngredientSpawner.h"
 
@@ -22,12 +24,20 @@ AEC_Worktop::AEC_Worktop()
 	BoxComponent->SetCollisionProfileName(TEXT("Interactable"));
 	BoxComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	BoxComponent->SetCollisionResponseToChannel(COLLISION_INTERACTABLE, ECR_Overlap);
+
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
 void AEC_Worktop::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void AEC_Worktop::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AEC_Worktop, CurrentItem);
 }
 
 // Called every frame
@@ -61,6 +71,39 @@ void AEC_Worktop::OnUnhilighted(AEldenCookCharacter* InteractingChar)
 	}
 }
 
+void AEC_Worktop::OnInteract(AEldenCookCharacter* InteractingChar)
+{
+	if(InteractingChar)
+	{
+		if(GetLocalRole() == ROLE_Authority)
+		{
+			//if character is carrying an item and there is no item here
+			if(InteractingChar->GetCurrentItem() && !CurrentItem)
+			{
+				AddToWorktop(InteractingChar->GetCurrentItem());
+				InteractingChar->DropItem();
+			}
+			//if character is not carrying an item and there is an item here
+			else if(!InteractingChar->GetCurrentItem() && CurrentItem)
+			{
+				InteractingChar->EquipItem(CurrentItem);
+				RemoveCurrentItemFromWorktop();
+			}
+		}
+	}
+}
+
+void AEC_Worktop::AddToWorktop(AEC_Item* ItemToAdd)
+{
+	CurrentItem = ItemToAdd;
+	CurrentItem->SetActorLocation(GetActorLocation() + ItemLocation);
+}
+
+void AEC_Worktop::RemoveCurrentItemFromWorktop()
+{
+	CurrentItem = nullptr;
+}
+
 void AEC_Worktop::SetInteractingMaterial()
 {
 	const UStaticMesh* CurrMesh = MeshComponent->GetStaticMesh();
@@ -80,5 +123,10 @@ void AEC_Worktop::RemoveInteractingMaterial()
 	{
 		CurrMesh->SetMaterial(0, PreviousMaterial);
 	}
+}
+
+void AEC_Worktop::OnRep_CurrentItem()
+{
+
 }
 

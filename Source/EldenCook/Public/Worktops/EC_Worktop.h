@@ -29,10 +29,17 @@ public:
 	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnHighlighted(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnUnhilighted(AEldenCookCharacter* InteractingChar) override;
+	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
 	/* interactable interface */
 	
 	virtual void SetInteractingMaterial();
 	virtual void RemoveInteractingMaterial();
+
+	virtual void AddToWorktop(AEC_Item* ItemToAdd);
+	virtual void RemoveCurrentItemFromWorktop();
+
+	UFUNCTION()
+	virtual void OnRep_CurrentItem();
 	
 protected:
 	UPROPERTY(VisibleAnywhere, Category="Components")
@@ -46,6 +53,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category=Settings)
 	UMaterialInstance* MaterialWhileInteracting;
+
+	UPROPERTY(ReplicatedUsing=OnRep_CurrentItem)
+	AEC_Item* CurrentItem;
+
+	UPROPERTY(EditAnywhere, Meta = (MakeEditWidget = true))
+	FVector ItemLocation;
 
 private:
 	UPROPERTY()
