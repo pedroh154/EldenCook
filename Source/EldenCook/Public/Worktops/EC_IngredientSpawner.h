@@ -38,20 +38,22 @@ class ELDENCOOK_API AEC_IngredientSpawner : public AEC_ItemSpawner
 	
 public:
 	AEC_IngredientSpawner();
-	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+	
+protected:
 	virtual void BeginPlay() override;
-
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+	
+public:
 	virtual void SpawnItem() override;
 	virtual void SpawnIngredient();
 
 private:
 	virtual bool CheckForDataTable();
 
-private:
-	bool bUseDataTable;
-
 protected:
 	UPROPERTY(EditAnywhere, Category="Settings")
 	FDataTableRowHandle IngredientToSpawn;
-
+	
+private:
+	bool bUseDataTable; //helper
 };

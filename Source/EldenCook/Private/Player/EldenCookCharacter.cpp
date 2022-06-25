@@ -225,7 +225,6 @@ void AEldenCookCharacter::DetachCurrentItem()
 {
 	const FDetachmentTransformRules Rules(EDetachmentRule::KeepWorld, true);
 	CurrentItem->DetachFromActor(Rules);
-	CurrentItem->GetMeshComponent()->SetSimulatePhysics(true);
 }
 
 void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)

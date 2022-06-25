@@ -13,51 +13,52 @@ UCLASS(Abstract)
 class ELDENCOOK_API AEC_Worktop : public AActor, public IEC_InteractableInterface
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	AEC_Worktop();
+	
+protected:	
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	// UFUNCTION()
-	// virtual void OnBoxComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	//
-	// UFUNCTION()
-	// virtual void OnBoxComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	/* interactable interface */
+public:
+	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
 	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnHighlighted(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnUnhilighted(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
-	/* interactable interface */
-	
+	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
+
+public:
+	virtual void AddToWorktop(AEC_Item* ItemToAdd);
+	virtual void RemoveCurrentItemFromWorktop();
 	virtual void SetInteractingMaterial();
 	virtual void RemoveInteractingMaterial();
 
-	virtual void AddToWorktop(AEC_Item* ItemToAdd);
-	virtual void RemoveCurrentItemFromWorktop();
-
+public:
+	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- START */
 	UFUNCTION()
 	virtual void OnRep_CurrentItem();
+	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- END */
 	
 protected:
-	UPROPERTY(VisibleAnywhere, Category="Components")
+	UPROPERTY(VisibleAnywhere, Category="EC_Worktop|Components")
 	UStaticMeshComponent* MeshComponent;
 
-	UPROPERTY(VisibleAnywhere, Category="Components")
+	UPROPERTY(VisibleAnywhere, Category="EC_Worktop|Components")
 	UBoxComponent* BoxComponent;
 
-	UPROPERTY(VisibleAnywhere, Category="Status")
+	UPROPERTY(VisibleAnywhere, Category="EC_Worktop|Status")
 	TArray<AEldenCookCharacter*> InteractingCharacters;
 
-	UPROPERTY(EditAnywhere, Category=Settings)
-	UMaterialInstance* MaterialWhileInteracting;
-
-	UPROPERTY(ReplicatedUsing=OnRep_CurrentItem)
+	UPROPERTY(VisibleAnywhere, Category="EC_Worktop|Settings|Status", ReplicatedUsing=OnRep_CurrentItem)
 	AEC_Item* CurrentItem;
 
-	UPROPERTY(EditAnywhere, Meta = (MakeEditWidget = true))
+	UPROPERTY(EditAnywhere, Category="EC_Worktop|Settings|FX")
+	UMaterialInstance* MaterialWhileInteracting;
+
+	//location where the item will be put when on this worktop
+	UPROPERTY(EditAnywhere, Category="EC_Worktop|Settings|Settings", Meta = (MakeEditWidget = true))
 	FVector ItemLocation;
 
 private:
