@@ -21,8 +21,8 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
-	/* Interact ---------------------- */
 	
+	/* INTERACT -------------------------------------------------------------------------------------------------------------------------- START */
 public:
 	virtual void InputInteract();
 	virtual void Interact(IEC_InteractableInterface* Interactable);
@@ -32,12 +32,25 @@ private:
 	//for some reason setting IEC_InteractableInterface type didn't work for RPC so we receive the actor and cast it
 	UFUNCTION(Server, Reliable)
 	virtual void Server_Interact(AActor* Interactable);
+	/* INTERACT -------------------------------------------------------------------------------------------------------------------------- END */
 	
-	/* Interact ---------------------- */
+	
+private:
+	//used on Interact and Drop item
+	virtual void SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem = nullptr);
 
 	
-	/* Drop Item ---------------------- */
+	/* EQUIP ITEM -------------------------------------------------------------------------------------------------------------------------- START */
+public:
+	virtual void EquipItem(AEC_Item* Item);
+
+private:
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void Server_EquipItem(AEC_Item* Item);
+	/* EQUIP ITEM -------------------------------------------------------------------------------------------------------------------------- END */
+
 	
+	/* DROP ITEM -------------------------------------------------------------------------------------------------------------------------- START */
 public:
 	virtual void InputDropItem();
 	virtual void DropItem();
@@ -46,23 +59,9 @@ public:
 private:
 	UFUNCTION(Server, Reliable, WithValidation)
 	virtual void Server_DropItem();
-	
-	/* Drop Item ---------------------- */
+	/* DROP ITEM -------------------------------------------------------------------------------------------------------------------------- END */
 
-
-	/* Equip Item ---------------------- */
 	
-public:
-	virtual void EquipItem(AEC_Item* Item);
-
-private:
-	UFUNCTION(Server, Reliable, WithValidation)
-	virtual void Server_EquipItem(AEC_Item* Item);
-	
-	virtual void SetCurrentItem(AEC_Item* NewItem);
-	
-	/* Equip Item ---------------------- */
-
 public:
 	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None);
 	virtual void DetachCurrentItem();
@@ -72,7 +71,7 @@ public:
 
 	/* REP NOTIFIERS */
 	UFUNCTION()
-	virtual void OnRep_CurrentItem();
+	virtual void OnRep_CurrentItem(AEC_Item* LastItem);
 	/* REP NOTIFIERS */
 	
 protected:

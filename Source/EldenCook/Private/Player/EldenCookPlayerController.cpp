@@ -14,9 +14,10 @@ AEldenCookPlayerController::AEldenCookPlayerController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
+	bAutoManageActiveCameraTarget = false; //we don't want this because this brings problems to clients when settings level camera, they will switch back to pawn view target
 }
 
-void AEldenCookPlayerController::SwitchToLevelCamera()
+bool AEldenCookPlayerController::SwitchToLevelCamera()
 {
 	if(IsLocalController())
 	{
@@ -29,9 +30,12 @@ void AEldenCookPlayerController::SwitchToLevelCamera()
 			if(Cameras[i] && Cameras[i]->ActorHasTag(TEXT("Level")))
 			{
 				SetViewTarget(Cameras[i]);
+				return true;
 			}
 		}
 	}
+
+	return false;
 }
 
 void AEldenCookPlayerController::BeginPlay()
@@ -40,7 +44,8 @@ void AEldenCookPlayerController::BeginPlay()
 
 	if(GetNetMode() == NM_ListenServer)
 	{
-		SwitchToLevelCamera(); //try switch to level camera. clients will switch OnRep_Pawn, bc pawn replication happens a few moments after begin play, putting it here wouldnt setviewtarget
+		//try switch to level camera. clients will switch OnRep_Pawn, bc pawn replication happens a few moments after begin play, putting it here wouldnt setviewtarget
+		SwitchToLevelCamera();
 	}
 }
 

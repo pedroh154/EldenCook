@@ -84,6 +84,7 @@ void AEldenCookCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(AEldenCookCharacter, CurrentItem)
 }
 
+/* INTERACT ----------------------------------------- START */
 void AEldenCookCharacter::InputInteract()
 {
 	//when Interact button is pressed, check if we are hitting an interactable
@@ -123,14 +124,16 @@ void AEldenCookCharacter::Server_Interact_Implementation(AActor* Interactable)
 {
 	OnInteract(Cast<IEC_InteractableInterface>(Interactable));
 }
+/* INTERACT ----------------------------------------- END */
 
+/* EQUIP ITEM ----------------------------------------- START */
 void AEldenCookCharacter::EquipItem(AEC_Item* Item)
 {
 	if(IsValid(Item))
 	{
 		if(GetLocalRole() == ROLE_Authority)
 		{
-			SetCurrentItem(Item);
+			SetCurrentItem(Item, CurrentItem);
 		}
 		else
 		{
@@ -148,7 +151,29 @@ bool AEldenCookCharacter::Server_EquipItem_Validate(AEC_Item* Item)
 {
 	return true;
 }
+/* EQUIP ITEM ----------------------------------------- END */
 
+void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
+{
+	//this function is called by clients OnRep_CurrentItem
+	
+	//equipping
+	if(!IsValid(LastItem) && IsValid(NewItem))
+	{
+		CurrentItem = NewItem;
+		CurrentItem->OnEquip(this);
+		AttachItem(NewItem);
+	}
+	//dropping
+	else if(IsValid(CurrentItem) && !IsValid(NewItem))
+	{
+		DetachCurrentItem();
+		CurrentItem->OnUnequip();
+		CurrentItem = nullptr;
+	}
+}
+
+/* DROP ITEM ----------------------------------------- START */
 void AEldenCookCharacter::InputDropItem()
 {
 	if(CurrentItem)
@@ -184,26 +209,9 @@ bool AEldenCookCharacter::Server_DropItem_Validate()
 
 void AEldenCookCharacter::OnDropItem()
 {
-	SetCurrentItem(nullptr);
+	SetCurrentItem(nullptr, CurrentItem);
 }
-
-void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem)
-{
-	//equipping
-	if(!IsValid(CurrentItem) && IsValid(NewItem))
-	{
-		AttachItem(NewItem);
-		CurrentItem = NewItem;
-		CurrentItem->OnEquip(this);
-	}
-	//dropping
-	else if(CurrentItem && !NewItem)
-	{
-		DetachCurrentItem();
-		CurrentItem->OnUnequip();
-		CurrentItem = nullptr;
-	}
-}
+/* DROP ITEM ----------------------------------------- END */
 
 void AEldenCookCharacter::AttachItem(AEC_Item* ItemToAttach, const FName Socket)
 {
@@ -236,9 +244,9 @@ void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)
 	}
 }
 
-void AEldenCookCharacter::OnRep_CurrentItem()
+void AEldenCookCharacter::OnRep_CurrentItem(AEC_Item* LastItem)
 {
-	SetCurrentItem(CurrentItem);
+	SetCurrentItem(CurrentItem, LastItem);
 }
 
 

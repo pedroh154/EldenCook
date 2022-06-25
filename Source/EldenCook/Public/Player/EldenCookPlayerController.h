@@ -21,7 +21,8 @@ public:
 	virtual void OnRep_Pawn() override;
 	
 	UFUNCTION()
-	virtual void SwitchToLevelCamera();
+	virtual bool SwitchToLevelCamera();
+	
 	/** Time Threshold to know if it was a short press */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	float ShortPressThreshold;
