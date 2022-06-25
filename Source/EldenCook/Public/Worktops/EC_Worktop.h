@@ -51,14 +51,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="EC_Worktop|Status")
 	TArray<AEldenCookCharacter*> InteractingCharacters;
 
-	UPROPERTY(VisibleAnywhere, Category="EC_Worktop|Settings|Status", ReplicatedUsing=OnRep_CurrentItem)
+	UPROPERTY(VisibleAnywhere, Category="EC_Worktop|Status", ReplicatedUsing=OnRep_CurrentItem)
 	AEC_Item* CurrentItem;
 
 	UPROPERTY(EditAnywhere, Category="EC_Worktop|Settings|FX")
 	UMaterialInstance* MaterialWhileInteracting;
 
 	//location where the item will be put when on this worktop
-	UPROPERTY(EditAnywhere, Category="EC_Worktop|Settings|Settings", Meta = (MakeEditWidget = true))
+	UPROPERTY(EditAnywhere, Category="EC_Worktop|Settings", Meta = (MakeEditWidget = true))
 	FVector ItemLocation;
 
 private:

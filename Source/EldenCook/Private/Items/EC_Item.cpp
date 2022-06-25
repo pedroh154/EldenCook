@@ -46,14 +46,11 @@ void AEC_Item::OnEquip(AEldenCookCharacter* Char)
 	SetOwner(Char);
 	MyPlayer = Char;
 	SetActorEnableCollision(false);
-	MeshComponent->SetSimulatePhysics(false);
 }
 
 void AEC_Item::OnUnequip()
 {
 	SetActorEnableCollision(true);
-	MeshComponent->AddForce(FVector(MyPlayer->GetActorForwardVector() * 1000.0f));
-	MeshComponent->SetSimulatePhysics(true);
 	SetOwner(nullptr);
 	MyPlayer = nullptr;
 }
