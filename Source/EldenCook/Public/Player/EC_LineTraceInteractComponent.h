@@ -14,25 +14,25 @@ class ELDENCOOK_API UEC_LineTraceInteractComponent : public USceneComponent
 
 public:	
 	UEC_LineTraceInteractComponent();
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:	
 	virtual void PerformTrace();
 
 public:
-	UPROPERTY(EditAnywhere, Category=Settings)
+	UPROPERTY(EditAnywhere, Category="EC_LineTraceInteractComponent|Settings")
 	float TraceDistanceMultiplier;
 	
-	UPROPERTY(EditAnywhere, Category=Settings)
+	UPROPERTY(EditAnywhere, Category="EC_LineTraceInteractComponent|Settings")
 	TEnumAsByte<ECollisionChannel> TraceCollisionChannel;
 
-	UPROPERTY(EditAnywhere, Category=Settings)
+	UPROPERTY(EditAnywhere, Category="EC_LineTraceInteractComponent|Settings")
 	bool bDrawDebug;
 
-	//broadcast whenever a new actor has been hit by raycast; does not broadcast if nullptr.
+	//broadcast whenever a new actor has been hit by raycast
 	UPROPERTY()
 	FNewActorHit NewHitActorDelegate;
 

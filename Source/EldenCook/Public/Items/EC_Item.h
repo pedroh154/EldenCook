@@ -16,32 +16,36 @@ class ELDENCOOK_API AEC_Item  : public AActor, public IEC_InteractableInterface
 	
 public:	
 	AEC_Item();
+
+protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
-protected:
-	//needs to replicate bc if we set mesh server-side it won't be set client-side
-	UPROPERTY(VisibleDefaultsOnly, Category="Components", Replicated)
-	UStaticMeshComponent* MeshComponent;
-
-protected:
-	UPROPERTY(VisibleAnywhere, Category="Status")
-	AEldenCookCharacter* MyPlayer;
-
-	UPROPERTY(VisibleAnywhere, Category="Status")
-	AEC_Worktop* MyWorktop;
-
-public:	
+public:
+	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
+	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
+	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
+	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
+	
+	/* EVENTS -------------------------------------------------------------------------------------------------------------------------- START */
+public:
 	virtual void OnEquip(AEldenCookCharacter* Char);
 	virtual void OnUnequip();
 	virtual void OnEnterWorktop(AEC_Worktop* Worktop);
 	virtual void OnLeaveWorktop();
+	/* EVENTS -------------------------------------------------------------------------------------------------------------------------- START */
+
+protected:
+	//needs to replicate bc if we set mesh server-side it won't be set client-side
+	UPROPERTY(VisibleDefaultsOnly, Category="EC_Item|Components", Replicated)
+	UStaticMeshComponent* MeshComponent;
 	
-	/* Interactable Interface */
-	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
-	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
-	/* Interactable Interface */
+	UPROPERTY(VisibleAnywhere, Category="EC_Item|Status")
+	AEldenCookCharacter* MyPlayer;
+
+	UPROPERTY(VisibleAnywhere, Category="EC_Item|Status")
+	AEC_Worktop* MyWorktop;
 	
 	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }
 };

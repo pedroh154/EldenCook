@@ -28,10 +28,14 @@ AEC_Worktop::AEC_Worktop()
 	bReplicates = true;
 }
 
-// Called when the game starts or when spawned
 void AEC_Worktop::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void AEC_Worktop::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }
 
 void AEC_Worktop::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -40,10 +44,27 @@ void AEC_Worktop::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AEC_Worktop, CurrentItem);
 }
 
-// Called every frame
-void AEC_Worktop::Tick(float DeltaTime)
+/* INTERACT ----------------------------------------- START */
+void AEC_Worktop::OnInteract(AEldenCookCharacter* InteractingChar)
 {
-	Super::Tick(DeltaTime);
+	if(InteractingChar)
+	{
+		if(GetLocalRole() == ROLE_Authority)
+		{
+			//if character is carrying an item and there is no item here
+			if(InteractingChar->GetCurrentItem() && !CurrentItem)
+			{
+				AddToWorktop(InteractingChar->GetCurrentItem());
+				InteractingChar->DropItem();
+			}
+			//if character is not carrying an item and there is an item here
+			else if(!InteractingChar->GetCurrentItem() && CurrentItem)
+			{
+				InteractingChar->EquipItem(CurrentItem);
+				RemoveCurrentItemFromWorktop();
+			}
+		}
+	}
 }
 
 bool AEC_Worktop::CanInteract(AEldenCookCharacter* InteractingChar)
@@ -70,28 +91,7 @@ void AEC_Worktop::OnUnhilighted(AEldenCookCharacter* InteractingChar)
 		RemoveInteractingMaterial();
 	}
 }
-
-void AEC_Worktop::OnInteract(AEldenCookCharacter* InteractingChar)
-{
-	if(InteractingChar)
-	{
-		if(GetLocalRole() == ROLE_Authority)
-		{
-			//if character is carrying an item and there is no item here
-			if(InteractingChar->GetCurrentItem() && !CurrentItem)
-			{
-				AddToWorktop(InteractingChar->GetCurrentItem());
-				InteractingChar->DropItem();
-			}
-			//if character is not carrying an item and there is an item here
-			else if(!InteractingChar->GetCurrentItem() && CurrentItem)
-			{
-				InteractingChar->EquipItem(CurrentItem);
-				RemoveCurrentItemFromWorktop();
-			}
-		}
-	}
-}
+/* INTERACT ----------------------------------------- END */
 
 void AEC_Worktop::AddToWorktop(AEC_Item* ItemToAdd)
 {

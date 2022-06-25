@@ -69,10 +69,10 @@ public:
 	UFUNCTION()
 	virtual void OnLineTraceHighlight(AActor* Hit, AActor* Last);
 
-	/* REP NOTIFIERS */
+	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- START */
 	UFUNCTION()
 	virtual void OnRep_CurrentItem(AEC_Item* LastItem);
-	/* REP NOTIFIERS */
+	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- END */
 	
 protected:
 	/** Top down camera */

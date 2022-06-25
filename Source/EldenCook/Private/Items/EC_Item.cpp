@@ -14,11 +14,6 @@ AEC_Item::AEC_Item()
 	bReplicates = true;
 }
 
-void AEC_Item::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-}
-
 void AEC_Item::BeginPlay()
 {
 	Super::BeginPlay();
@@ -29,6 +24,23 @@ void AEC_Item::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void AEC_Item::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+}
+
+/* INTERACT ----------------------------------------- START */
+void AEC_Item::OnInteract(AEldenCookCharacter* InteractingChar)
+{
+}
+
+bool AEC_Item::CanInteract(AEldenCookCharacter* InteractingChar)
+{
+	return true;
+}
+/* INTERACT ----------------------------------------- END */
+
+/* EVENTS ----------------------------------------- START */
 void AEC_Item::OnEquip(AEldenCookCharacter* Char)
 {
 	SetOwner(Char);
@@ -55,16 +67,7 @@ void AEC_Item::OnLeaveWorktop()
 {
 	MyWorktop = nullptr;
 }
-
-void AEC_Item::OnInteract(AEldenCookCharacter* InteractingChar)
-{
-}
-
-bool AEC_Item::CanInteract(AEldenCookCharacter* InteractingChar)
-{
-	return true;
-}
-
+/* EVENTS ----------------------------------------- END */
 
 
 

@@ -10,11 +10,6 @@ AEC_ItemSpawner::AEC_ItemSpawner()
 	ItemSpawnCooldown = 0;
 }
 
-void AEC_ItemSpawner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-}
-
 void AEC_ItemSpawner::BeginPlay()
 {
 	Super::BeginPlay();
@@ -24,6 +19,11 @@ void AEC_ItemSpawner::BeginPlay()
 	{
 		GetWorldTimerManager().SetTimer(ItemSpawnCooldownTimerManager, this, &AEC_ItemSpawner::SpawnItem, ItemSpawnCooldown, true, -1.0f);
 	}
+}
+
+void AEC_ItemSpawner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
 void AEC_ItemSpawner::SpawnItem()
@@ -70,24 +70,7 @@ void AEC_ItemSpawner::SpawnItem()
 	}
 }
 
-void AEC_ItemSpawner::PlaySpawnFX_Implementation()
-{
-	for (UParticleSystem* Particle : ItemSpawnFX)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Particle, CurrentItem->GetActorLocation());
-	}
-
-	for (USoundBase* Sound : ItemSpawnSFX)
-	{
-		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), Sound, CurrentItem->GetActorLocation());
-	}
-}
-
-bool AEC_ItemSpawner::CanInteract(AEldenCookCharacter* InteractingChar)
-{
-	return Super::CanInteract(InteractingChar);
-}
-
+/* INTERACT ----------------------------------------- START */
 void AEC_ItemSpawner::OnInteract(AEldenCookCharacter* InteractingChar)
 {
 	if(CanInteract(InteractingChar))
@@ -109,6 +92,25 @@ void AEC_ItemSpawner::OnInteract(AEldenCookCharacter* InteractingChar)
 				GetWorldTimerManager().SetTimer(ItemSpawnCooldownTimerManager, this, &AEC_ItemSpawner::SpawnItem, ItemSpawnCooldown, true, -1.0f);
 			}
 		}
+	}
+}
+
+bool AEC_ItemSpawner::CanInteract(AEldenCookCharacter* InteractingChar)
+{
+	return Super::CanInteract(InteractingChar);
+}
+/* INTERACT ----------------------------------------- END */
+
+void AEC_ItemSpawner::PlaySpawnFX_Implementation()
+{
+	for (UParticleSystem* Particle : ItemSpawnFX)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Particle, CurrentItem->GetActorLocation());
+	}
+
+	for (USoundBase* Sound : ItemSpawnSFX)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), Sound, CurrentItem->GetActorLocation());
 	}
 }
 
