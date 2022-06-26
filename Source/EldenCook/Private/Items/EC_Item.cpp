@@ -12,6 +12,7 @@ AEC_Item::AEC_Item()
 	MeshComponent->SetCollisionProfileName(TEXT("Interactable"));
 	
 	bReplicates = true;
+	bDrawDebugVars = false;
 }
 
 void AEC_Item::BeginPlay()
@@ -22,6 +23,7 @@ void AEC_Item::BeginPlay()
 void AEC_Item::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if(bDrawDebugVars) DrawDebugVars();
 }
 
 void AEC_Item::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -64,6 +66,14 @@ void AEC_Item::OnLeaveWorktop()
 {
 	MyWorktop = nullptr;
 }
+
+void AEC_Item::DrawDebugVars()
+{
+	DrawDebugString(GetWorld(), GetActorLocation(), FString::Printf(TEXT("MyPlayer: %s"), MyPlayer ? *MyPlayer->GetName() : TEXT("NULL")));
+	DrawDebugString(GetWorld(), GetActorLocation() + FVector(0.0f, 0.0f, -2.0f), FString::Printf(TEXT("MyWorktop: %s"), MyWorktop ? *MyWorktop->GetName() : TEXT("NULL")));
+	DrawDebugString(GetWorld(), GetActorLocation() + FVector(0.0f, 0.0f, -4.0f), FString::Printf(TEXT("MyWorktop: %s"), MyWorktop ? *MyWorktop->GetName() : TEXT("NULL")));
+}
+
 /* EVENTS ----------------------------------------- END */
 
 

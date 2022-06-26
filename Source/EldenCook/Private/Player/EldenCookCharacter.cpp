@@ -56,6 +56,7 @@ AEldenCookCharacter::AEldenCookCharacter()
 	LineTraceInteractComponent->NewHitActorDelegate.AddDynamic(this, &AEldenCookCharacter::OnLineTraceHighlight);
 
 	bReplicates = true;
+	bDrawDebugVars = false;
 
 	HP = 3;
 }
@@ -69,6 +70,7 @@ void AEldenCookCharacter::BeginPlay()
 void AEldenCookCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+	if(bDrawDebugVars) DrawDebugVars();
 }
 
 void AEldenCookCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -240,6 +242,15 @@ void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)
 	{
 		LastInteractable->OnUnhilighted(this);
 	}
+}
+
+void AEldenCookCharacter::DrawDebugVars()
+{
+	DrawDebugString(GetWorld(), GetActorLocation(), FString::Printf(TEXT("HP: %d"), HP));
+	DrawDebugString(GetWorld(), GetActorLocation() + FVector(0.0f, 0.0f, -2.0f), FString::Printf(TEXT("Current Item: %s"), CurrentItem ? *CurrentItem->GetName() : TEXT("NULL")));
+	DrawDebugString(GetWorld(), GetActorLocation() + FVector(0.0f, 0.0f, -4.0f), FString::Printf(TEXT("HP: %d"), HP));
+	DrawDebugString(GetWorld(), GetActorLocation() + FVector(0.0f, 0.0f, -6.0f), FString::Printf(TEXT("Trace Hit: %s"), LineTraceInteractComponent->GetCurrentHitInteractable() ?
+		*Cast<AActor>(LineTraceInteractComponent->GetCurrentHitInteractable())->GetName() : TEXT("NULL")));
 }
 
 void AEldenCookCharacter::OnRep_CurrentItem(AEC_Item* LastItem)

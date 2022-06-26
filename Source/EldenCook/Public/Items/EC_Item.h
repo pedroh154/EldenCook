@@ -36,6 +36,8 @@ public:
 	virtual void OnLeaveWorktop();
 	/* EVENTS -------------------------------------------------------------------------------------------------------------------------- START */
 
+	virtual void DrawDebugVars();
+	
 protected:
 	//needs to replicate bc if we set mesh server-side it won't be set client-side
 	UPROPERTY(VisibleDefaultsOnly, Category="EC_Item|Components", Replicated)
@@ -46,6 +48,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category="EC_Item|Status")
 	AEC_Worktop* MyWorktop;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="EC_Item|Settings")
+	bool bDrawDebugVars;
 	
 	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }
 };

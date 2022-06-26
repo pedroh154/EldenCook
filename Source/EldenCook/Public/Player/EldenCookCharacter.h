@@ -69,28 +69,32 @@ public:
 	UFUNCTION()
 	virtual void OnLineTraceHighlight(AActor* Hit, AActor* Last);
 
+	virtual void DrawDebugVars();
+
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- START */
 	UFUNCTION()
 	virtual void OnRep_CurrentItem(AEC_Item* LastItem);
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- END */
 	
 protected:
-	/** Top down camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="EC_Character|Components", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* TopDownCameraComponent;
-
-	/** Camera boom positioning the camera above the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
-
-	/** Camera boom positioning the camera above the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UEC_InteractComponent* LineTraceInteractComponent;
 	
-	UPROPERTY(EditDefaultsOnly, Category="Config|Player")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="EC_Character|Components", meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* CameraBoom;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="EC_Character|Components", meta = (AllowPrivateAccess = "true"))
+	class UEC_InteractComponent* LineTraceInteractComponent;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="EC_Character|Settings")
+	bool bDrawDebugVars;
+
+protected:
+	UPROPERTY(EditAnywhere, Category="EC_Character|Config")
 	int32 HP;
 
-	UPROPERTY(VisibleAnywhere, Category="Status", ReplicatedUsing=OnRep_CurrentItem)
+	UPROPERTY(VisibleAnywhere, Category="EC_Character|Status", ReplicatedUsing=OnRep_CurrentItem)
 	AEC_Item* CurrentItem;
 	
 public:
