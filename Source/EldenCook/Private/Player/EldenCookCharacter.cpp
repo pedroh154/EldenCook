@@ -1,5 +1,4 @@
 #include "EldenCook/Public/Player/EldenCookCharacter.h"
-
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
@@ -56,6 +55,7 @@ AEldenCookCharacter::AEldenCookCharacter()
 	LineTraceInteractComponent->NewHitActorDelegate.AddDynamic(this, &AEldenCookCharacter::OnLineTraceHighlight);
 
 	bReplicates = true;
+	
 	bDrawDebugVars = false;
 
 	HP = 3;
@@ -166,10 +166,10 @@ void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 		AttachItem(NewItem);
 	}
 	//dropping
-	else if(IsValid(CurrentItem) && !IsValid(NewItem))
+	else if(IsValid(LastItem) && !IsValid(NewItem))
 	{
 		DetachCurrentItem();
-		CurrentItem->OnUnequip();
+		LastItem->OnUnequip();
 		CurrentItem = nullptr;
 	}
 }
@@ -224,8 +224,11 @@ void AEldenCookCharacter::AttachItem(AEC_Item* ItemToAttach, const FName Socket)
 
 void AEldenCookCharacter::DetachCurrentItem()
 {
-	const FDetachmentTransformRules Rules(EDetachmentRule::KeepWorld, true);
-	CurrentItem->DetachFromActor(Rules);
+	if(CurrentItem)
+	{
+		const FDetachmentTransformRules Rules(EDetachmentRule::KeepWorld, true);
+		CurrentItem->DetachFromActor(Rules);
+	}
 }
 
 void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)
@@ -246,11 +249,17 @@ void AEldenCookCharacter::OnLineTraceHighlight(AActor* Hit, AActor* Last)
 
 void AEldenCookCharacter::DrawDebugVars()
 {
-	DrawDebugString(GetWorld(), GetActorLocation(), FString::Printf(TEXT("HP: %d"), HP));
-	DrawDebugString(GetWorld(), GetActorLocation() + FVector(0.0f, 0.0f, -2.0f), FString::Printf(TEXT("Current Item: %s"), CurrentItem ? *CurrentItem->GetName() : TEXT("NULL")));
-	DrawDebugString(GetWorld(), GetActorLocation() + FVector(0.0f, 0.0f, -4.0f), FString::Printf(TEXT("HP: %d"), HP));
-	DrawDebugString(GetWorld(), GetActorLocation() + FVector(0.0f, 0.0f, -6.0f), FString::Printf(TEXT("Trace Hit: %s"), LineTraceInteractComponent->GetCurrentHitInteractable() ?
-		*Cast<AActor>(LineTraceInteractComponent->GetCurrentHitInteractable())->GetName() : TEXT("NULL")));
+	const FVector ActorLoc = GetActorLocation();
+	
+	DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -0.f), FString::Printf(TEXT("HP: %d"), HP), nullptr,
+		FColor::Green, GetWorld()->GetDeltaSeconds(), true, 1);
+	
+	DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -50.0f), FString::Printf(TEXT("Current Item: %s"), CurrentItem ? *CurrentItem->GetName() : TEXT("NULL")), nullptr,
+		FColor::Blue, GetWorld()->GetDeltaSeconds(), true, 1);
+
+	DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -100.0f), FString::Printf(TEXT("Trace Hit: %s"), LineTraceInteractComponent->GetCurrentHitInteractable() ?
+		*Cast<AActor>(LineTraceInteractComponent->GetCurrentHitInteractable())->GetName() : TEXT("NULL")), nullptr,
+		FColor::Red, GetWorld()->GetDeltaSeconds(), true, 1);
 }
 
 void AEldenCookCharacter::OnRep_CurrentItem(AEC_Item* LastItem)

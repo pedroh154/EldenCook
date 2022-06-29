@@ -33,21 +33,20 @@ private:
 	UFUNCTION(Server, Reliable)
 	virtual void Server_Interact(AActor* Interactable);
 	/* INTERACT -------------------------------------------------------------------------------------------------------------------------- END */
-	
-	
-private:
-	//used on Interact and Drop item
-	virtual void SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem = nullptr);
 
 	
 	/* EQUIP ITEM -------------------------------------------------------------------------------------------------------------------------- START */
 public:
 	virtual void EquipItem(AEC_Item* Item);
-
+	
 private:
 	UFUNCTION(Server, Reliable, WithValidation)
 	virtual void Server_EquipItem(AEC_Item* Item);
 	/* EQUIP ITEM -------------------------------------------------------------------------------------------------------------------------- END */
+
+private:
+	//used on Equip and Drop item
+	virtual void SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem = nullptr);
 
 	
 	/* DROP ITEM -------------------------------------------------------------------------------------------------------------------------- START */
