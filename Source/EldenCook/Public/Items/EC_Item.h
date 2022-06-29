@@ -40,7 +40,7 @@ public:
 	
 protected:
 	//needs to replicate bc if we set mesh server-side it won't be set client-side
-	UPROPERTY(VisibleDefaultsOnly, Category="EC_Item|Components", Replicated)
+	UPROPERTY(VisibleDefaultsOnly, Category="EC_Item|Components")
 	UStaticMeshComponent* MeshComponent;
 	
 	UPROPERTY(VisibleAnywhere, Category="EC_Item|Status")

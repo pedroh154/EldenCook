@@ -44,6 +44,9 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, Category="EC_InteractComponent|Status")
 	TArray<FHitResult> CurrentHit;
+
+	//UPROPERTY(EditAnywhere, Category="EC_InteractComponent|Settings")
+	//TArray<TSubclassOf<IEC_InteractableInterface>> PriorityOrder;
 	
 public:
 	TArray<FHitResult> GetCurrentHit() { return CurrentHit; };

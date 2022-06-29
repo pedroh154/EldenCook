@@ -1,4 +1,3 @@
-
 #include "EldenCook/Public/Worktops/EC_Worktop.h"
 #include "Components/BoxComponent.h"
 #include "EldenCook/EldenCook.h"
@@ -54,14 +53,14 @@ void AEC_Worktop::OnInteract(AEldenCookCharacter* InteractingChar)
 			//if character is carrying an item and there is no item here
 			if(InteractingChar->GetCurrentItem() && !CurrentItem)
 			{
-				AddToWorktop(InteractingChar->GetCurrentItem());
+				SetCurrentItem(InteractingChar->GetCurrentItem(), CurrentItem);
 				InteractingChar->DropItem();
 			}
 			//if character is not carrying an item and there is an item here
 			else if(!InteractingChar->GetCurrentItem() && CurrentItem)
 			{
 				InteractingChar->EquipItem(CurrentItem);
-				RemoveCurrentItemFromWorktop();
+				SetCurrentItem(nullptr, CurrentItem);
 			}
 		}
 	}
@@ -93,17 +92,6 @@ void AEC_Worktop::OnUnhilighted(AEldenCookCharacter* InteractingChar)
 }
 /* INTERACT ----------------------------------------- END */
 
-void AEC_Worktop::AddToWorktop(AEC_Item* ItemToAdd)
-{
-	CurrentItem = ItemToAdd;
-	CurrentItem->SetActorLocation(GetActorLocation() + ItemLocation);
-}
-
-void AEC_Worktop::RemoveCurrentItemFromWorktop()
-{
-	CurrentItem = nullptr;
-}
-
 void AEC_Worktop::SetInteractingMaterial()
 {
 	const UStaticMesh* CurrMesh = MeshComponent->GetStaticMesh();
@@ -112,6 +100,40 @@ void AEC_Worktop::SetInteractingMaterial()
 	{
 		PreviousMaterial = CurrMesh->GetMaterial(0);
 		MeshComponent->GetStaticMesh()->SetMaterial(0, MaterialWhileInteracting);
+	}
+}
+
+/* ADD ITEM ----------------------------------------- START */
+void AEC_Worktop::AddItemToWorktop(AEC_Item* Item)
+{
+	if(Item)
+	{
+		SetCurrentItem(Item, CurrentItem);
+	}
+}
+
+void AEC_Worktop::RemoveCurrentItemFromWorktop()
+{
+	SetCurrentItem(nullptr, CurrentItem);
+}
+/* ADD ITEM ----------------------------------------- END */
+
+void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
+{
+	//this function is called by clients OnRep_CurrentItem
+
+	//adding item to worktop
+	if(NewItem && !LastItem)
+	{
+		CurrentItem = NewItem;
+		CurrentItem->OnEnterWorktop(this);
+		CurrentItem->SetActorLocation(GetActorLocation() + ItemLocation);
+	}
+	//removing item from worktop
+	else if(!NewItem && LastItem)
+	{
+		LastItem->OnLeaveWorktop();
+		CurrentItem = nullptr;
 	}
 }
 
@@ -125,8 +147,8 @@ void AEC_Worktop::RemoveInteractingMaterial()
 	}
 }
 
-void AEC_Worktop::OnRep_CurrentItem()
+void AEC_Worktop::OnRep_CurrentItem(AEC_Item* Last)
 {
-
+	SetCurrentItem(CurrentItem, Last);
 }
 

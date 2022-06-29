@@ -9,25 +9,6 @@
 
 class AEC_SerializableIngredient;
 
-USTRUCT(BlueprintType)
-struct FIngredient : public FTableRowBase
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FText Description;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UTexture2D* HUDIcon;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UStaticMesh* Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	bool bCuts;
-};
-
 //An EC_Item spawner specialized for EC_SerializableIngredients.
 //You can set a data table row handle and it will read the ingredients properties from a data table and serialize and EC_SerializableIngredient.
 //if no data table is set, it will fallback to the TSubClassOf system from EC_ItemSpawner. It then will act like a normal EC_ItemSpawner.
@@ -51,8 +32,8 @@ private:
 	virtual bool CheckForDataTable();
 
 protected:
-	UPROPERTY(EditAnywhere, Category="Settings")
-	FDataTableRowHandle IngredientToSpawn;
+	UPROPERTY(EditAnywhere, Category="AEC_IngredientSpawner|Settings")
+	FDataTableRowHandle IngredientToSpawnHandler;
 	
 private:
 	bool bUseDataTable; //helper

@@ -34,6 +34,13 @@ void AEC_Item::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 /* INTERACT ----------------------------------------- START */
 void AEC_Item::OnInteract(AEldenCookCharacter* InteractingChar)
 {
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		if(!InteractingChar->GetCurrentItem())
+		{
+			InteractingChar->EquipItem(this);
+		}
+	}
 }
 
 bool AEC_Item::CanInteract(AEldenCookCharacter* InteractingChar)
@@ -48,6 +55,7 @@ void AEC_Item::OnEquip(AEldenCookCharacter* Char)
 	SetOwner(Char);
 	MyPlayer = Char;
 	SetActorEnableCollision(false);
+	SetCurrentlyInteractable(false, this);
 }
 
 void AEC_Item::OnUnequip()
@@ -55,6 +63,7 @@ void AEC_Item::OnUnequip()
 	SetActorEnableCollision(true);
 	SetOwner(nullptr);
 	MyPlayer = nullptr;
+	SetCurrentlyInteractable(true, this);
 }
 
 void AEC_Item::OnEnterWorktop(AEC_Worktop* Worktop)
@@ -69,9 +78,13 @@ void AEC_Item::OnLeaveWorktop()
 
 void AEC_Item::DrawDebugVars()
 {
-	DrawDebugString(GetWorld(), GetActorLocation(), FString::Printf(TEXT("MyPlayer: %s"), MyPlayer ? *MyPlayer->GetName() : TEXT("NULL")));
-	DrawDebugString(GetWorld(), GetActorLocation() + FVector(0.0f, 0.0f, -2.0f), FString::Printf(TEXT("MyWorktop: %s"), MyWorktop ? *MyWorktop->GetName() : TEXT("NULL")));
-	DrawDebugString(GetWorld(), GetActorLocation() + FVector(0.0f, 0.0f, -4.0f), FString::Printf(TEXT("MyWorktop: %s"), MyWorktop ? *MyWorktop->GetName() : TEXT("NULL")));
+	const FVector ActorLoc = GetActorLocation();
+	
+	DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -0), FString::Printf(TEXT("MyPlayer: %s"), *GetNameSafe(MyPlayer)), nullptr,
+		FColor::Green, GetWorld()->GetDeltaSeconds(), true, 1);
+	
+	DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -50.0f), FString::Printf(TEXT("MyWorktop: %s"), *GetNameSafe(MyWorktop)), nullptr,
+		FColor::Blue, GetWorld()->GetDeltaSeconds(), true, 1);
 }
 
 /* EVENTS ----------------------------------------- END */

@@ -33,7 +33,7 @@ public:
 	
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- START */
 public:
-	virtual void OnRep_CurrentItem() override;
+	virtual void OnRep_CurrentItem(AEC_Item* Last) override;
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- END */
 	
 protected:

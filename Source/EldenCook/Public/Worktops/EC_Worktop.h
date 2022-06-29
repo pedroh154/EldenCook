@@ -20,6 +20,7 @@ public:
 protected:	
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
 public:
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
@@ -30,15 +31,22 @@ public:
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
 
 public:
-	virtual void AddToWorktop(AEC_Item* ItemToAdd);
+	/* ADD ITEM TO WORKTOP -------------------------------------------------------------------------------------------------------------------------- START */
+	virtual void AddItemToWorktop(AEC_Item* Item);
 	virtual void RemoveCurrentItemFromWorktop();
+	/* ADD ITEM TO WORKTOP -------------------------------------------------------------------------------------------------------------------------- END */
+
+private:
+	virtual void SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem);
+
+public:
 	virtual void SetInteractingMaterial();
 	virtual void RemoveInteractingMaterial();
-
+	
 public:
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- START */
 	UFUNCTION()
-	virtual void OnRep_CurrentItem();
+	virtual void OnRep_CurrentItem(AEC_Item* Last);
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- END */
 	
 protected:

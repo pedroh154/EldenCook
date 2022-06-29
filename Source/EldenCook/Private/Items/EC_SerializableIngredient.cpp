@@ -15,9 +15,9 @@ void AEC_SerializableIngredient::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AEC_SerializableIngredient::Init(UTexture2D* NewHUDIcon, UStaticMesh* Mesh, const bool NewCuts)
+void AEC_SerializableIngredient::Init(UTexture2D* NewHUDIcon, UStaticMesh* Mesh, TEnumAsByte<EIngredientTypes> IngType)
 {
 	this->HUDIcon = NewHUDIcon;
 	MeshComponent->SetStaticMesh(Mesh);
-	this->bCuts = NewCuts;
+	Type = IngType;
 }

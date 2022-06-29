@@ -17,7 +17,7 @@ void AEC_ItemSpawner::BeginPlay()
 	//if multiplayer, only start the timer server-side
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		GetWorldTimerManager().SetTimer(ItemSpawnCooldownTimerManager, this, &AEC_ItemSpawner::SpawnItem, ItemSpawnCooldown, true, -1.0f);
+		GetWorldTimerManager().SetTimer(ItemSpawnCooldownTimerManager, this, &AEC_ItemSpawner::SpawnItem, ItemSpawnCooldown + 0.01f, true, -1.0f);
 	}
 }
 
@@ -49,8 +49,9 @@ void AEC_ItemSpawner::SpawnItem()
 			{
 				//finish spawning it
 				UGameplayStatics::FinishSpawningActor(SpawnedItem, FTransform(WorldLoc));
-				CurrentItem = SpawnedItem;
-				SpawnedItem->OnEnterWorktop(this);
+				AddItemToWorktop(SpawnedItem);
+
+				SpawnedItem->SetCurrentlyInteractable(false, SpawnedItem);
 
 				//pause spawn timer until someone picks that item up
 				GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
@@ -65,7 +66,7 @@ void AEC_ItemSpawner::SpawnItem()
 		else
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 10.0f,
-				FColor::Red, FString::Printf(TEXT("No item class set for spawner %s"), *this->GetName()));
+				FColor::Red, FString::Printf(TEXT("No item class set for spawner %s, will not spawn any."), *this->GetName()));
 		}
 	}
 }
@@ -89,7 +90,8 @@ void AEC_ItemSpawner::OnInteract(AEldenCookCharacter* InteractingChar)
 			else if(!InteractingChar->GetCurrentItem() && CurrentItem)
 			{
 				Super::OnInteract(InteractingChar);
-				GetWorldTimerManager().SetTimer(ItemSpawnCooldownTimerManager, this, &AEC_ItemSpawner::SpawnItem, ItemSpawnCooldown, true, -1.0f);
+				GetWorldTimerManager().SetTimer(ItemSpawnCooldownTimerManager, this, &AEC_ItemSpawner::SpawnItem, ItemSpawnCooldown + 0.01f, true, -1.0f);
+				//make sure we add +0.01 in case of cooldown being 0.0 otherwise timer gets invalidated.
 			}
 		}
 	}
@@ -114,9 +116,9 @@ void AEC_ItemSpawner::PlaySpawnFX_Implementation()
 	}
 }
 
-void AEC_ItemSpawner::OnRep_CurrentItem()
+void AEC_ItemSpawner::OnRep_CurrentItem(AEC_Item* Last)
 {
-	Super::OnRep_CurrentItem();
+	Super::OnRep_CurrentItem(Last);
 
 	if(CurrentItem && GetNetMode() == NM_Client)
 	{
