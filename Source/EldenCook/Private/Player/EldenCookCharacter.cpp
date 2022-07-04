@@ -59,6 +59,8 @@ AEldenCookCharacter::AEldenCookCharacter()
 	bDrawDebugVars = false;
 
 	HP = 3;
+
+	HandsSocketName = TEXT("SOCKET_Hands");
 }
 
 void AEldenCookCharacter::BeginPlay()
@@ -89,7 +91,7 @@ void AEldenCookCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 /* INTERACT ----------------------------------------- START */
 void AEldenCookCharacter::InputInteract()
 {
-	//when Interact button is pressed, check if we are hitting an interactable
+	//when Interact button is pressed, check if we are hitting an interactable (we don't want to waste rpc calls)
 	IEC_InteractableInterface* Interactable = LineTraceInteractComponent->GetCurrentHitInteractable();
 
 	//if we are, proceed with interact
@@ -112,13 +114,17 @@ void AEldenCookCharacter::Interact(IEC_InteractableInterface* Interactable)
 
 void AEldenCookCharacter::OnInteract(IEC_InteractableInterface* Interactable)
 {
-	const IEC_InteractableInterface* LineTraceHit = Cast<IEC_InteractableInterface>(LineTraceInteractComponent->GetCurrentHitInteractable());
-
-	//check if the LineTrace is actually hitting the Interactable (for client sent rpc)
-	if(LineTraceHit == Interactable)
+	if(GetLocalRole() == ROLE_Authority)
 	{
-		Interactable->OnInteract(this);
+		const IEC_InteractableInterface* LineTraceHit = Cast<IEC_InteractableInterface>(LineTraceInteractComponent->GetCurrentHitInteractable());
+		
+		//check if the LineTrace is actually hitting the Interactable
+		if(LineTraceHit == Interactable)
+		{
+			Interactable->OnInteract(this);
+		}
 	}
+
 }
 
 void AEldenCookCharacter::Server_Interact_Implementation(AActor* Interactable)
@@ -132,15 +138,23 @@ void AEldenCookCharacter::EquipItem(AEC_Item* Item)
 {
 	if(IsValid(Item))
 	{
-		if(GetLocalRole() == ROLE_Authority)
+		if(CanEquipItem())
 		{
-			SetCurrentItem(Item, CurrentItem);
-		}
-		else
-		{
-			Server_EquipItem(Item);
+			if(GetLocalRole() == ROLE_Authority)
+			{
+				SetCurrentItem(Item, CurrentItem);
+			}
+			else
+			{
+				Server_EquipItem(Item);
+			}
 		}
 	}
+}
+
+bool AEldenCookCharacter::CanEquipItem() const
+{
+	return true;
 }
 
 void AEldenCookCharacter::Server_EquipItem_Implementation(AEC_Item* Item)
@@ -163,7 +177,7 @@ void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 	{
 		CurrentItem = NewItem;
 		CurrentItem->OnEquip(this);
-		AttachItem(NewItem);
+		AttachItem(NewItem, HandsSocketName);
 	}
 	//dropping
 	else if(IsValid(LastItem) && !IsValid(NewItem))
@@ -177,6 +191,7 @@ void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 /* DROP ITEM ----------------------------------------- START */
 void AEldenCookCharacter::InputDropItem()
 {
+	//check if we actually have an item equipped before sending rpc
 	if(CurrentItem)
 	{
 		DropItem();
@@ -185,16 +200,14 @@ void AEldenCookCharacter::InputDropItem()
 
 void AEldenCookCharacter::DropItem()
 {
-	if(IsValid(CurrentItem))
+	//send rpc if client
+	if(GetLocalRole() < ROLE_Authority)
 	{
-		if(GetLocalRole() == ROLE_Authority)
-		{
-			OnDropItem();
-		}
-		else
-		{
-			Server_DropItem();
-		}
+		Server_DropItem();
+	}
+	else
+	{
+		OnDropItem();
 	}
 }
 
@@ -218,7 +231,7 @@ void AEldenCookCharacter::AttachItem(AEC_Item* ItemToAttach, const FName Socket)
 {
 	if(IsValid(ItemToAttach))
 	{
-		ItemToAttach->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, Socket);
+		ItemToAttach->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, Socket);
 	}
 }
 

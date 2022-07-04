@@ -38,6 +38,7 @@ private:
 	/* EQUIP ITEM -------------------------------------------------------------------------------------------------------------------------- START */
 public:
 	virtual void EquipItem(AEC_Item* Item);
+	bool CanEquipItem() const;
 	
 private:
 	UFUNCTION(Server, Reliable, WithValidation)
@@ -59,12 +60,14 @@ private:
 	UFUNCTION(Server, Reliable, WithValidation)
 	virtual void Server_DropItem();
 	/* DROP ITEM -------------------------------------------------------------------------------------------------------------------------- END */
+	
 
 	
-public:
+private:
 	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None);
 	virtual void DetachCurrentItem();
-	
+
+public:
 	UFUNCTION()
 	virtual void OnLineTraceHighlight(AActor* Hit, AActor* Last);
 
@@ -76,25 +79,28 @@ public:
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- END */
 	
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="EC_Character|Components", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AEC_Character|Components", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* TopDownCameraComponent;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="EC_Character|Components", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AEC_Character|Components", meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="EC_Character|Components", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AEC_Character|Components", meta = (AllowPrivateAccess = "true"))
 	class UEC_InteractComponent* LineTraceInteractComponent;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="EC_Character|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AEC_Character|Settings")
 	bool bDrawDebugVars;
 
 protected:
-	UPROPERTY(EditAnywhere, Category="EC_Character|Config")
+	UPROPERTY(EditAnywhere, Category="AEC_Character|Config")
 	int32 HP;
 
-	UPROPERTY(VisibleAnywhere, Category="EC_Character|Status", ReplicatedUsing=OnRep_CurrentItem)
+	UPROPERTY(VisibleAnywhere, Category="AEC_Character|Status", ReplicatedUsing=OnRep_CurrentItem)
 	AEC_Item* CurrentItem;
+
+	UPROPERTY(EditDefaultsOnly, Category="AEC_Character|Settings")
+	FName HandsSocketName;
 	
 public:
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }

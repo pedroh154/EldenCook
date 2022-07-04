@@ -40,7 +40,7 @@ void AEC_Recipe::NotifyHUD()
 
 		if(PlayerController->IsLocalController())
 		{
-			Cast<AEC_HUD>(PlayerController->GetHUD())->BP_OnNewRecipe(this);
+			PlayerController->GetEc_HUD()->BP_OnNewRecipe(this);
 		}
 	}
 }

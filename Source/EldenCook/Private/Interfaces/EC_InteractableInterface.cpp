@@ -18,6 +18,10 @@ void IEC_InteractableInterface::OnInteract(AEldenCookCharacter* InteractingChar)
 		FString::Printf(TEXT("Interacting with an object that has no OnInteract() implementation!")));
 }
 
+void IEC_InteractableInterface::OnInteract(AEC_Item* Item)
+{
+}
+
 bool IEC_InteractableInterface::CanInteract(AEldenCookCharacter* InteractingChar)
 {
 	return true;

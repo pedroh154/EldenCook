@@ -3,6 +3,7 @@
 #pragma once
 #include "EC_InteractableInterface.generated.h"
 
+class AEC_Item;
 class AEldenCookCharacter;
 
 UINTERFACE(MinimalAPI, Blueprintable)
@@ -19,6 +20,7 @@ public:
 	virtual void OnHighlighted(AEldenCookCharacter* InteractingChar); //if this obj has been "highlighted" by raycast or something
 	virtual void OnUnhilighted(AEldenCookCharacter* InteractingChar); //if the raycast is no longer detecting this obj.
 	virtual void OnInteract(AEldenCookCharacter* InteractingChar);
+	virtual void OnInteract(AEC_Item* Item);
 	virtual bool CanInteract(AEldenCookCharacter* InteractingChar);
 	virtual void SetCurrentlyInteractable(bool bInteractable, AActor* Interactable);
 };

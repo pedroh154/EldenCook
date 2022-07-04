@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "EldenCookPlayerController.generated.h"
 
+class AEC_HUD;
 /** Forward declaration to improve compiling times */
 class UNiagaraSystem;
 
@@ -30,6 +31,8 @@ public:
 	/** FX Class that we will spawn when clicking */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UNiagaraSystem* FXCursor;
+
+	AEC_HUD* GetEc_HUD();
 
 
 protected:

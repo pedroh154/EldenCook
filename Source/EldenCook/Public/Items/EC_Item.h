@@ -7,6 +7,7 @@
 
 class AEldenCookCharacter;
 class AEC_Worktop;
+class AEC_Plate;
 
 //An actor that will be attached to the player's hand or a worktop (CurrentItem* inside EC_Character)
 UCLASS(Abstract)
@@ -26,6 +27,7 @@ public:
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
 	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
+	virtual void OnInteract(AEC_Item* Item) override;
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
 	
 	/* EVENTS -------------------------------------------------------------------------------------------------------------------------- START */
@@ -34,23 +36,24 @@ public:
 	virtual void OnUnequip();
 	virtual void OnEnterWorktop(AEC_Worktop* Worktop);
 	virtual void OnLeaveWorktop();
+	virtual void OnEnterPlate(AEC_Plate* Plate);
 	/* EVENTS -------------------------------------------------------------------------------------------------------------------------- START */
 
 	virtual void DrawDebugVars();
 	
 protected:
 	//needs to replicate bc if we set mesh server-side it won't be set client-side
-	UPROPERTY(VisibleDefaultsOnly, Category="EC_Item|Components")
+	UPROPERTY(VisibleDefaultsOnly, Category="AEC_Item|Components")
 	UStaticMeshComponent* MeshComponent;
 	
-	UPROPERTY(VisibleAnywhere, Category="EC_Item|Status")
+	UPROPERTY(VisibleAnywhere, Category="AEC_Item|Status")
 	AEldenCookCharacter* MyPlayer;
 
-	UPROPERTY(VisibleAnywhere, Category="EC_Item|Status")
+	UPROPERTY(VisibleAnywhere, Category="AEC_Item|Status")
 	AEC_Worktop* MyWorktop;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="EC_Item|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AEC_Item|Settings")
 	bool bDrawDebugVars;
 	
 	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }

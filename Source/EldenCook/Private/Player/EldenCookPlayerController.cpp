@@ -9,6 +9,7 @@
 #include "EldenCook/Public/Player/EldenCookCharacter.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/EC_HUD.h"
 
 AEldenCookPlayerController::AEldenCookPlayerController()
 {
@@ -36,6 +37,11 @@ bool AEldenCookPlayerController::SwitchToLevelCamera()
 	}
 
 	return false;
+}
+
+AEC_HUD* AEldenCookPlayerController::GetEc_HUD()
+{
+	return Cast<AEC_HUD>(GetHUD());
 }
 
 void AEldenCookPlayerController::BeginPlay()

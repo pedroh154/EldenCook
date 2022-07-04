@@ -2,6 +2,7 @@
 #include "Worktops/EC_Worktop.h"
 #include "EldenCook/Public/Player/EldenCookCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Items/EC_Plate.h"
 
 AEC_Item::AEC_Item()
 {
@@ -36,11 +37,16 @@ void AEC_Item::OnInteract(AEldenCookCharacter* InteractingChar)
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		if(!InteractingChar->GetCurrentItem())
-		{
-			InteractingChar->EquipItem(this);
-		}
+		InteractingChar->EquipItem(this);
+
+		AEC_Item* Item = InteractingChar->GetCurrentItem();
+		if(Item) Item->OnInteract(this); 
 	}
+}
+
+void AEC_Item::OnInteract(AEC_Item* Item)
+{
+	IEC_InteractableInterface::OnInteract(Item);
 }
 
 bool AEC_Item::CanInteract(AEldenCookCharacter* InteractingChar)
@@ -74,6 +80,14 @@ void AEC_Item::OnEnterWorktop(AEC_Worktop* Worktop)
 void AEC_Item::OnLeaveWorktop()
 {
 	MyWorktop = nullptr;
+}
+
+void AEC_Item::OnEnterPlate(AEC_Plate* Plate)
+{
+	SetOwner(Plate);
+	MyPlayer = Plate->MyPlayer;
+	SetActorEnableCollision(false);
+	SetCurrentlyInteractable(false, this);
 }
 
 void AEC_Item::DrawDebugVars()
