@@ -23,10 +23,10 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+	virtual void OnConstruction(const FTransform& Transform) override;
 	
 public:
 	virtual void SpawnItem() override;
-	virtual void SpawnIngredient();
 
 private:
 	virtual bool CheckForDataTable();

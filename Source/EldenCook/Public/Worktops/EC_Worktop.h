@@ -8,6 +8,35 @@ class AEC_Item;
 class UBoxComponent;
 class AEldenCookCharacter;
 
+USTRUCT()
+struct FCustomWorktopConfig
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMesh* CustomItemMesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	FVector CustomItemSize;
+
+	UPROPERTY(EditDefaultsOnly)
+	bool bShowItemMesh;
+
+	FCustomWorktopConfig()
+	{
+		/* if we want the CurrentItem to have a custom mesh as soon as it is attached to this */
+		CustomItemMesh = nullptr;
+		
+		/* if we want the CurrentItem to have a custom size as soon as it is attached to this */
+		CustomItemSize = FVector::ZeroVector;
+
+		/* should we show the mesh of the item that is currently attached to this worktop ?
+		* this is useful if we want the spawner to have the appearance of a box for example (like a box of bread where the spawned item are taken "from inside" */
+		bShowItemMesh = false;
+	}
+};
+
 //An interactable worktop like object that stores whoever collides with its box component collision.
 UCLASS(Abstract)
 class ELDENCOOK_API AEC_Worktop : public AActor, public IEC_InteractableInterface
@@ -21,6 +50,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 public:
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
@@ -36,12 +66,13 @@ public:
 	virtual void RemoveCurrentItemFromWorktop();
 	/* ADD ITEM TO WORKTOP -------------------------------------------------------------------------------------------------------------------------- END */
 
-private:
+protected:
 	virtual void SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem);
 
 public:
 	virtual void SetInteractingMaterial();
 	virtual void RemoveInteractingMaterial();
+	virtual void ApplyCustomWorktopConfig();
 	
 public:
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- START */
@@ -50,24 +81,32 @@ public:
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- END */
 	
 protected:
-	UPROPERTY(VisibleAnywhere, Category="EC_Worktop|Components")
+	UPROPERTY(VisibleAnywhere, Category="AEC_Worktop|Components")
 	UStaticMeshComponent* MeshComponent;
 
-	UPROPERTY(VisibleAnywhere, Category="EC_Worktop|Components")
+	UPROPERTY(VisibleAnywhere, Category="AEC_Worktop|Components")
 	UBoxComponent* BoxComponent;
 
-	UPROPERTY(VisibleAnywhere, Category="EC_Worktop|Status")
+	UPROPERTY(VisibleAnywhere, Category="AEC_Worktop|Status")
 	TArray<AEldenCookCharacter*> InteractingCharacters;
 
-	UPROPERTY(VisibleAnywhere, Category="EC_Worktop|Status", ReplicatedUsing=OnRep_CurrentItem)
+	UPROPERTY(VisibleAnywhere, Category="AEC_Worktop|Status", ReplicatedUsing=OnRep_CurrentItem)
 	AEC_Item* CurrentItem;
 
-	UPROPERTY(EditAnywhere, Category="EC_Worktop|Settings|FX")
+	UPROPERTY(EditDefaultsOnly, Category="AEC_Worktop|Settings")
+	FCustomWorktopConfig CustomConfig;
+
+private:
+	UPROPERTY()
+	UStaticMeshComponent* CustomCurrentItemMeshComp;
+
+protected:
+	UPROPERTY(EditAnywhere, Category="AEC_Worktop|Settings|FX")
 	UMaterialInstance* MaterialWhileInteracting;
 
 	//location where the item will be put when on this worktop
-	UPROPERTY(EditAnywhere, Category="EC_Worktop|Settings", Meta = (MakeEditWidget = true))
-	FVector ItemLocation;
+	UPROPERTY(EditAnywhere, Category="AEC_Worktop|Settings", Meta = (MakeEditWidget = true))
+	FName ItemSpawnSocketName;
 
 private:
 	UPROPERTY()

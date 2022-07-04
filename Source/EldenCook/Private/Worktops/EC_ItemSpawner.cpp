@@ -3,7 +3,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/EldenCookCharacter.h"
-#include "Components/BoxComponent.h"
 
 AEC_ItemSpawner::AEC_ItemSpawner()
 {
@@ -26,47 +25,56 @@ void AEC_ItemSpawner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
+void AEC_ItemSpawner::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		SpawnItem();
+	}
+}
+
 void AEC_ItemSpawner::SpawnItem()
 {
 	//do it only server side, item will replicate to clients
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		if(IsValid(CurrentItem))
-		{
-			return;
-		}
-	
-		if(ItemToSpawnClass)
-		{
-			//since location is in local space, convert it to world-space
-			const FVector WorldLoc = GetActorLocation() + ItemLocation;
-		
-			//spawn item (will replicate back to clients)
-			AEC_Item* SpawnedItem = Cast<AEC_Item>(UGameplayStatics::BeginDeferredActorSpawnFromClass(GetWorld(),
-				ItemToSpawnClass, FTransform(WorldLoc), ESpawnActorCollisionHandlingMethod::AlwaysSpawn, this));
-		
-			if(IsValid(SpawnedItem))
+		if(!HasAnyFlags(RF_Transient))//Check if this is not a preview actor. Avoid running this twice OnConstruction(). https://forums.unrealengine.com/t/actor-onconstruction-runs-twice/349114/2
+		{ 
+			if(IsValid(CurrentItem))
 			{
-				//finish spawning it
-				UGameplayStatics::FinishSpawningActor(SpawnedItem, FTransform(WorldLoc));
-				AddItemToWorktop(SpawnedItem);
-
-				SpawnedItem->SetCurrentlyInteractable(false, SpawnedItem);
-
-				//pause spawn timer until someone picks that item up
-				GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
-
-				//play spawn fx if listen server; will also play on client on OnRep_CurrentSpawnedItem
-				if(GetNetMode() == NM_ListenServer)
+				return;
+			}
+	
+			if(ensure(ItemToSpawnClass))
+			{
+				//since location is in local space, convert it to world-space
+				const FVector WorldLoc = GetActorLocation() + RootComponent->GetSocketLocation(ItemSpawnSocketName);
+		
+				//spawn item (will replicate back to clients)
+				AEC_Item* SpawnedItem = Cast<AEC_Item>(UGameplayStatics::BeginDeferredActorSpawnFromClass(GetWorld(),
+					ItemToSpawnClass, FTransform(WorldLoc), ESpawnActorCollisionHandlingMethod::AlwaysSpawn, this));
+		
+				if(IsValid(SpawnedItem))
 				{
+					//finish spawning it
+					UGameplayStatics::FinishSpawningActor(SpawnedItem, FTransform(WorldLoc));
+					AddItemToWorktop(SpawnedItem);
+
+					SpawnedItem->SetCurrentlyInteractable(false, SpawnedItem);
+
+					//pause spawn timer until someone picks that item up
+					GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
+
+					//play spawn fx if listen server; will also play on client on OnRep_CurrentSpawnedItem
 					PlaySpawnFX();
 				}
 			}
-		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.0f,
-				FColor::Red, FString::Printf(TEXT("No item class set for spawner %s, will not spawn any."), *this->GetName()));
+			else
+			{
+				GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
+			}
 		}
 	}
 }
@@ -105,23 +113,23 @@ bool AEC_ItemSpawner::CanInteract(AEldenCookCharacter* InteractingChar)
 
 void AEC_ItemSpawner::PlaySpawnFX_Implementation()
 {
-	for (UParticleSystem* Particle : ItemSpawnFX)
+	if(GetNetMode() != NM_DedicatedServer)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Particle, CurrentItem->GetActorLocation());
-	}
+		for (UParticleSystem* Particle : ItemSpawnFX)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Particle, CurrentItem->GetActorLocation());
+		}
 
-	for (USoundBase* Sound : ItemSpawnSFX)
-	{
-		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), Sound, CurrentItem->GetActorLocation());
+		for (USoundBase* Sound : ItemSpawnSFX)
+		{
+			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), Sound, CurrentItem->GetActorLocation());
+		}
+
+		BP_PlaySpawnFX();
 	}
 }
 
 void AEC_ItemSpawner::OnRep_CurrentItem(AEC_Item* Last)
 {
 	Super::OnRep_CurrentItem(Last);
-
-	if(CurrentItem && GetNetMode() == NM_Client)
-	{
-		PlaySpawnFX();
-	}
 }

@@ -17,6 +17,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+	virtual void OnConstruction(const FTransform& Transform) override;
 	
 public:
 	virtual void SpawnItem() override;
@@ -28,8 +29,11 @@ public:
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
 
 public:
-	UFUNCTION(BlueprintNativeEvent, Category=Spawn)
+	UFUNCTION(NetMulticast, Unreliable, Category=Spawn)
 	void PlaySpawnFX();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_PlaySpawnFX();
 	
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- START */
 public:
@@ -37,19 +41,19 @@ public:
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- END */
 	
 protected:
-	UPROPERTY(EditAnywhere, Category="EC_ItemSpawner|Settings")
+	UPROPERTY(EditAnywhere, Category="AEC_ItemSpawner|Settings")
 	TSubclassOf<AEC_Item> ItemToSpawnClass;
 	
-	UPROPERTY(EditAnywhere, Category="EC_ItemSpawner|Settings")
+	UPROPERTY(EditAnywhere, Category="AEC_ItemSpawner|Settings")
 	float ItemSpawnCooldown;
 
 	UPROPERTY(BlueprintReadOnly)
 	FTimerHandle ItemSpawnCooldownTimerManager;
 
-	UPROPERTY(EditAnywhere, Category="EC_ItemSpawner|Settings|FX")
+	UPROPERTY(EditAnywhere, Category="AEC_ItemSpawner|Settings|FX")
 	TArray<UParticleSystem*> ItemSpawnFX;
 
-	UPROPERTY(EditAnywhere, Category="EC_ItemSpawner|Settings|FX")
+	UPROPERTY(EditAnywhere, Category="AEC_ItemSpawner|Settings|FX")
 	TArray<USoundBase*> ItemSpawnSFX;
 	
 };

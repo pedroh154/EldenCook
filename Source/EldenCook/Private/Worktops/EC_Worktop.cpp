@@ -2,6 +2,7 @@
 #include "Components/BoxComponent.h"
 #include "EldenCook/EldenCook.h"
 #include "Items/EC_Item.h"
+#include "Items/EC_Plate.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/EldenCookCharacter.h"
 #include "Worktops/EC_IngredientSpawner.h"
@@ -25,11 +26,14 @@ AEC_Worktop::AEC_Worktop()
 	BoxComponent->SetCollisionResponseToChannel(COLLISION_INTERACTABLE, ECR_Overlap);
 
 	bReplicates = true;
+
+	ItemSpawnSocketName = TEXT("SOCKET_ItemSpawn");
 }
 
 void AEC_Worktop::BeginPlay()
 {
 	Super::BeginPlay();
+	ApplyCustomWorktopConfig();
 }
 
 void AEC_Worktop::Tick(float DeltaTime)
@@ -43,6 +47,12 @@ void AEC_Worktop::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AEC_Worktop, CurrentItem);
 }
 
+void AEC_Worktop::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	ApplyCustomWorktopConfig();
+}
+
 /* INTERACT ----------------------------------------- START */
 void AEC_Worktop::OnInteract(AEldenCookCharacter* InteractingChar)
 {
@@ -53,14 +63,18 @@ void AEC_Worktop::OnInteract(AEldenCookCharacter* InteractingChar)
 			//if character is carrying an item and there is no item here
 			if(InteractingChar->GetCurrentItem() && !CurrentItem)
 			{
-				SetCurrentItem(InteractingChar->GetCurrentItem(), CurrentItem);
+				AddItemToWorktop(InteractingChar->GetCurrentItem());
 				InteractingChar->DropItem();
 			}
 			//if character is not carrying an item and there is an item here
 			else if(!InteractingChar->GetCurrentItem() && CurrentItem)
 			{
 				InteractingChar->EquipItem(CurrentItem);
-				SetCurrentItem(nullptr, CurrentItem);
+				RemoveCurrentItemFromWorktop();
+			}
+			//if character is carrying an item and there is an item here, let the items handle what should be done
+			else if(InteractingChar->GetCurrentItem() && CurrentItem)
+			{
 			}
 		}
 	}
@@ -106,10 +120,7 @@ void AEC_Worktop::SetInteractingMaterial()
 /* ADD ITEM ----------------------------------------- START */
 void AEC_Worktop::AddItemToWorktop(AEC_Item* Item)
 {
-	if(Item)
-	{
-		SetCurrentItem(Item, CurrentItem);
-	}
+	if(Item) SetCurrentItem(Item, CurrentItem);
 }
 
 void AEC_Worktop::RemoveCurrentItemFromWorktop()
@@ -125,14 +136,19 @@ void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 	//adding item to worktop
 	if(NewItem && !LastItem)
 	{
+		const FAttachmentTransformRules Rules(EAttachmentRule::SnapToTarget, false);
+		NewItem->AttachToComponent(RootComponent, Rules, ItemSpawnSocketName);
+		
 		CurrentItem = NewItem;
 		CurrentItem->OnEnterWorktop(this);
-		CurrentItem->SetActorLocation(GetActorLocation() + ItemLocation);
+
+		ApplyCustomWorktopConfig();
 	}
 	//removing item from worktop
 	else if(!NewItem && LastItem)
 	{
 		LastItem->OnLeaveWorktop();
+		LastItem->SetActorHiddenInGame(false);
 		CurrentItem = nullptr;
 	}
 }
@@ -144,6 +160,59 @@ void AEC_Worktop::RemoveInteractingMaterial()
 	if(IsValid(CurrMesh))
 	{
 		CurrMesh->SetMaterial(0, PreviousMaterial);
+	}
+}
+
+void AEC_Worktop::ApplyCustomWorktopConfig()
+{
+	if(CurrentItem)
+	{
+		if(CustomConfig.CustomItemMesh)
+		{
+			CustomCurrentItemMeshComp = NewObject<UStaticMeshComponent>(this);
+			CustomCurrentItemMeshComp->RegisterComponent();
+			CustomCurrentItemMeshComp->SetStaticMesh(CustomConfig.CustomItemMesh);
+			CustomCurrentItemMeshComp->SetWorldLocation(RootComponent->GetSocketLocation(ItemSpawnSocketName) + GetActorLocation());
+			CurrentItem->SetActorHiddenInGame(true);
+		}
+		else
+		{
+			CurrentItem->SetActorHiddenInGame(false);
+		}
+	
+		if(!CustomConfig.bShowItemMesh)
+		{
+			if(CustomCurrentItemMeshComp)
+			{
+				CustomCurrentItemMeshComp->SetHiddenInGame(true);
+			}
+			else
+			{
+				CurrentItem->SetActorHiddenInGame(true);
+			}
+		}
+		else
+		{
+			if(CustomCurrentItemMeshComp)
+			{
+				CustomCurrentItemMeshComp->SetHiddenInGame(false);
+			}
+			else
+			{
+				CurrentItem->SetActorHiddenInGame(false);
+			}
+		}
+
+		if(CustomConfig.CustomItemSize != FVector::ZeroVector)
+		{
+			if(CustomCurrentItemMeshComp) CustomCurrentItemMeshComp->SetWorldScale3D(CustomConfig.CustomItemSize);
+			CurrentItem->SetActorScale3D(CustomConfig.CustomItemSize);
+		}
+		else
+		{
+			CurrentItem->SetActorScale3D(FVector(1.0f, 1.0f, 1.0f));
+			if(CustomCurrentItemMeshComp) CustomCurrentItemMeshComp->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+		}
 	}
 }
 
