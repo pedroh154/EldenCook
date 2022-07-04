@@ -10,7 +10,7 @@ AEC_Item::AEC_Item()
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->SetIsReplicated(true);
-	MeshComponent->SetCollisionProfileName(TEXT("Interactable"));
+	MeshComponent->SetCollisionProfileName(TEXT("EC_Items"));
 	
 	bReplicates = true;
 	bDrawDebugVars = false;

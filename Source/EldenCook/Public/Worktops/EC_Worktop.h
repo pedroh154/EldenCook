@@ -25,7 +25,7 @@ public:
 
 	FCustomWorktopConfig()
 	{
-		/* if we want the CurrentItem to have a custom mesh as soon as it is attached to this */
+		/* if we want the CurrentItem to have a custom mesh as soon as it is attached to this (does not carry to item) */
 		CustomItemMesh = nullptr;
 		
 		/* if we want the CurrentItem to have a custom size as soon as it is attached to this */
@@ -33,7 +33,7 @@ public:
 
 		/* should we show the mesh of the item that is currently attached to this worktop ?
 		* this is useful if we want the spawner to have the appearance of a box for example (like a box of bread where the spawned item are taken "from inside" */
-		bShowItemMesh = false;
+		bShowItemMesh = true;
 	}
 };
 
@@ -72,7 +72,7 @@ protected:
 public:
 	virtual void SetInteractingMaterial();
 	virtual void RemoveInteractingMaterial();
-	virtual void ApplyCustomWorktopConfig();
+	virtual void ApplyCustomCurrentItemSettings();
 	
 public:
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- START */

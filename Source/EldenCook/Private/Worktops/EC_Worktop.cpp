@@ -33,7 +33,6 @@ AEC_Worktop::AEC_Worktop()
 void AEC_Worktop::BeginPlay()
 {
 	Super::BeginPlay();
-	ApplyCustomWorktopConfig();
 }
 
 void AEC_Worktop::Tick(float DeltaTime)
@@ -50,7 +49,7 @@ void AEC_Worktop::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 void AEC_Worktop::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	ApplyCustomWorktopConfig();
+	ApplyCustomCurrentItemSettings();
 }
 
 /* INTERACT ----------------------------------------- START */
@@ -142,7 +141,7 @@ void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 		CurrentItem = NewItem;
 		CurrentItem->OnEnterWorktop(this);
 
-		ApplyCustomWorktopConfig();
+		ApplyCustomCurrentItemSettings();
 	}
 	//removing item from worktop
 	else if(!NewItem && LastItem)
@@ -150,6 +149,7 @@ void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 		LastItem->OnLeaveWorktop();
 		LastItem->SetActorHiddenInGame(false);
 		CurrentItem = nullptr;
+		ApplyCustomCurrentItemSettings();
 	}
 }
 
@@ -163,28 +163,35 @@ void AEC_Worktop::RemoveInteractingMaterial()
 	}
 }
 
-void AEC_Worktop::ApplyCustomWorktopConfig()
+void AEC_Worktop::ApplyCustomCurrentItemSettings()
 {
-	if(CurrentItem)
+	if(IsValid(CurrentItem))
 	{
-		if(CustomConfig.CustomItemMesh)
+		if(IsValid(CustomConfig.CustomItemMesh))
 		{
-			CustomCurrentItemMeshComp = NewObject<UStaticMeshComponent>(this);
-			CustomCurrentItemMeshComp->RegisterComponent();
+			if(!IsValid(CustomCurrentItemMeshComp))
+			{
+				CustomCurrentItemMeshComp = NewObject<UStaticMeshComponent>(this);
+				CustomCurrentItemMeshComp->RegisterComponent();
+				CustomCurrentItemMeshComp->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, ItemSpawnSocketName);
+			}
+			
 			CustomCurrentItemMeshComp->SetStaticMesh(CustomConfig.CustomItemMesh);
 			CustomCurrentItemMeshComp->SetWorldLocation(RootComponent->GetSocketLocation(ItemSpawnSocketName) + GetActorLocation());
 			CurrentItem->SetActorHiddenInGame(true);
 		}
 		else
 		{
+			if(IsValid(CustomCurrentItemMeshComp)) CustomCurrentItemMeshComp->DestroyComponent();
 			CurrentItem->SetActorHiddenInGame(false);
 		}
 	
 		if(!CustomConfig.bShowItemMesh)
 		{
-			if(CustomCurrentItemMeshComp)
+			if(IsValid(CustomCurrentItemMeshComp))
 			{
 				CustomCurrentItemMeshComp->SetHiddenInGame(true);
+				CustomCurrentItemMeshComp->SetVisibility(false);
 			}
 			else
 			{
@@ -193,9 +200,10 @@ void AEC_Worktop::ApplyCustomWorktopConfig()
 		}
 		else
 		{
-			if(CustomCurrentItemMeshComp)
+			if(IsValid(CustomCurrentItemMeshComp))
 			{
 				CustomCurrentItemMeshComp->SetHiddenInGame(false);
+				CustomCurrentItemMeshComp->SetVisibility(true);
 			}
 			else
 			{
@@ -205,14 +213,18 @@ void AEC_Worktop::ApplyCustomWorktopConfig()
 
 		if(CustomConfig.CustomItemSize != FVector::ZeroVector)
 		{
-			if(CustomCurrentItemMeshComp) CustomCurrentItemMeshComp->SetWorldScale3D(CustomConfig.CustomItemSize);
+			if(IsValid(CustomCurrentItemMeshComp)) CustomCurrentItemMeshComp->SetWorldScale3D(CustomConfig.CustomItemSize);
 			CurrentItem->SetActorScale3D(CustomConfig.CustomItemSize);
 		}
 		else
 		{
 			CurrentItem->SetActorScale3D(FVector(1.0f, 1.0f, 1.0f));
-			if(CustomCurrentItemMeshComp) CustomCurrentItemMeshComp->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+			if(IsValid(CustomCurrentItemMeshComp)) CustomCurrentItemMeshComp->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
 		}
+	}
+	else
+	{
+		if(IsValid(CustomCurrentItemMeshComp)) CustomCurrentItemMeshComp->DestroyComponent();
 	}
 }
 
