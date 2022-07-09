@@ -1,4 +1,5 @@
 #include "EldenCook/Public/Player/EldenCookCharacter.h"
+#include "EldenCook/Public/Player/EldenCookPlayerController.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
@@ -78,14 +79,53 @@ void AEldenCookCharacter::Tick(float DeltaSeconds)
 void AEldenCookCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &AEldenCookCharacter::InputForward);
+	PlayerInputComponent->BindAxis(TEXT("Right"), this, &AEldenCookCharacter::InputRight);
 	PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &AEldenCookCharacter::InputInteract);
 	PlayerInputComponent->BindAction(TEXT("DropItem"), IE_Pressed, this, &AEldenCookCharacter::InputDropItem);
+	
 }
 
 void AEldenCookCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AEldenCookCharacter, CurrentItem)
+}
+
+void AEldenCookCharacter::InputForward(float Val)
+{
+	if(IsLocallyControlled())
+	{
+		const AEldenCookPlayerController* Ctrl = GetEcController();
+		
+		FVector ViewVec;
+		FRotator ViewRot;
+		
+		if(Ctrl)
+		{
+			Ctrl->GetPlayerViewPoint(ViewVec, ViewRot);
+		}
+		
+		AddMovementInput(FVector::ForwardVector, Val);
+	}
+}
+
+void AEldenCookCharacter::InputRight(float Val)
+{
+	if(IsLocallyControlled())
+	{
+		const AEldenCookPlayerController* Ctrl = GetEcController();
+		
+		FVector ViewVec;
+		FRotator ViewRot;
+		
+		if(Ctrl)
+		{
+			Ctrl->GetPlayerViewPoint(ViewVec, ViewRot);
+		}
+		
+		AddMovementInput(FVector::RightVector, Val);
+	}
 }
 
 /* INTERACT ----------------------------------------- START */
@@ -121,6 +161,9 @@ void AEldenCookCharacter::OnInteract(IEC_InteractableInterface* Interactable)
 		//check if the LineTrace is actually hitting the Interactable
 		if(LineTraceHit == Interactable)
 		{
+			UE_LOG(LogTemp, Display, TEXT("SV - AEldenCookCharacter::OnInteract(): %s interacting"), *GetName(), *GetNameSafe(LineTraceHit->_getUObject()));
+			
+			//call OnInteract on hit interactable
 			Interactable->OnInteract(this);
 		}
 	}
@@ -142,6 +185,7 @@ void AEldenCookCharacter::EquipItem(AEC_Item* Item)
 		{
 			if(GetLocalRole() == ROLE_Authority)
 			{
+				UE_LOG(LogTemp, Display, TEXT("SV - AEldenCookCharacter::EquipItem: %s equipping %s"), *GetNameSafe(this), *GetNameSafe(Item));
 				SetCurrentItem(Item, CurrentItem);
 			}
 			else
@@ -171,20 +215,49 @@ bool AEldenCookCharacter::Server_EquipItem_Validate(AEC_Item* Item)
 void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 {
 	//this function is called by clients OnRep_CurrentItem
-	
-	//equipping
-	if(!IsValid(LastItem) && IsValid(NewItem))
+	//bc of this, our new CurrentItem will be already set when this is called. We need to set-up some logic regarding the LastItem parameter:
+	AEC_Item* LocalLastItem = nullptr;
+
+	//if the passed LastItem is not null
+	if(LastItem != nullptr)
 	{
-		CurrentItem = NewItem;
-		CurrentItem->OnEquip(this);
-		AttachItem(NewItem, HandsSocketName);
+		LocalLastItem = LastItem; //then just use it
 	}
-	//dropping
-	else if(IsValid(LastItem) && !IsValid(NewItem))
+	
+	//if the passed LastItem is in fact null, check if the NewItem is != CurrentItem
+	//if it is, this does not come from replication, thus our LastItem will be our CurrentItem
+	//if it wasn't, then this comes from replication, thus our LastItem must remain null
+	else if (NewItem != CurrentItem)
 	{
-		DetachCurrentItem();
-		LastItem->OnUnequip();
-		CurrentItem = nullptr;
+		LocalLastItem = CurrentItem; //our LocalLastItem will be the CurrentItem
+	}
+
+	if(GetLocalRole() == ROLE_Authority)
+		UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: called on server"))
+	else
+		UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: called on client by onrep_ event"))
+
+	UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: trying to unequip last item"))
+	
+	//try unequip our LastItem
+	if(IsValid(LocalLastItem))
+	{
+		//try unequip previous
+		if(LocalLastItem->OnUnequip(NewItem))
+		{
+			DetachCurrentItem();
+		}
+	}
+
+	CurrentItem = NewItem;
+
+	UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: trying to equip new item"))
+	
+	//Try equip our NewItem
+	if(IsValid(NewItem))
+	{
+		NewItem->OnEquip(this);
+		AttachItem(NewItem, HandsSocketName);
 	}
 }
 
@@ -192,10 +265,7 @@ void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 void AEldenCookCharacter::InputDropItem()
 {
 	//check if we actually have an item equipped before sending rpc
-	if(CurrentItem)
-	{
-		DropItem();
-	}
+	if(CurrentItem) DropItem();
 }
 
 void AEldenCookCharacter::DropItem()
@@ -278,6 +348,11 @@ void AEldenCookCharacter::DrawDebugVars()
 void AEldenCookCharacter::OnRep_CurrentItem(AEC_Item* LastItem)
 {
 	SetCurrentItem(CurrentItem, LastItem);
+}
+
+AEldenCookPlayerController* AEldenCookCharacter::GetEcController() const
+{
+	return GetController<AEldenCookPlayerController>();
 }
 
 

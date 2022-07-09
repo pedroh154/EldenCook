@@ -10,7 +10,7 @@ class AEC_Worktop;
 class AEC_Plate;
 
 //An actor that will be attached to the player's hand or a worktop (CurrentItem* inside EC_Character)
-UCLASS(Abstract)
+UCLASS()
 class ELDENCOOK_API AEC_Item  : public AActor, public IEC_InteractableInterface
 {
 	GENERATED_BODY()
@@ -27,34 +27,33 @@ public:
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
 	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
-	virtual void OnInteract(AEC_Item* Item) override;
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
 	
 	/* EVENTS -------------------------------------------------------------------------------------------------------------------------- START */
 public:
 	virtual void OnEquip(AEldenCookCharacter* Char);
-	virtual void OnUnequip();
+	virtual bool OnUnequip(AEC_Item* NewItem);
 	virtual void OnEnterWorktop(AEC_Worktop* Worktop);
 	virtual void OnLeaveWorktop();
-	virtual void OnEnterPlate(AEC_Plate* Plate);
+	virtual void OnEnterPlate(AEC_Plate* Plate); //item can only enter plate
 	/* EVENTS -------------------------------------------------------------------------------------------------------------------------- START */
 
 	virtual void DrawDebugVars();
 	
 protected:
-	//needs to replicate bc if we set mesh server-side it won't be set client-side
 	UPROPERTY(VisibleDefaultsOnly, Category="AEC_Item|Components")
 	UStaticMeshComponent* MeshComponent;
 	
 	UPROPERTY(VisibleAnywhere, Category="AEC_Item|Status")
 	AEldenCookCharacter* MyPlayer;
-
+	
 	UPROPERTY(VisibleAnywhere, Category="AEC_Item|Status")
 	AEC_Worktop* MyWorktop;
-
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AEC_Item|Settings")
 	bool bDrawDebugVars;
 	
 	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }
+	FORCEINLINE class AEldenCookCharacter* GetMyPlayer() const { return MyPlayer; }
+	FORCEINLINE class AEC_Worktop* GetMyWorktop() const { return MyWorktop; }
 };

@@ -6,6 +6,8 @@
 #include "Items/EC_Item.h"
 #include "EC_Plate.generated.h"
 
+/* A item that can carry multiple items inside it */
+
 class AEC_SerializableIngredient;
 UCLASS()
 class ELDENCOOK_API AEC_Plate : public AEC_Item
@@ -33,13 +35,13 @@ public:
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
 
 	virtual void OnEquip(AEldenCookCharacter* Char) override;
-	virtual void OnUnequip() override;
-	virtual void OnInteract(AEC_Item* Item) override;
+	virtual bool OnUnequip(AEC_Item* NewItem) override;
 	
-public:
-	virtual void AddItem(AEC_Item* Ingredient, bool bFromRep = false);
-	virtual bool CanAddItem();
+private:
+	virtual bool AddItem(AEC_Item* Ingredient, bool bFromRep = false);
+	virtual bool CanAddItem(AEC_Item* ItemToAdd);
 
+public:
 	virtual void DrawDebugVars() override;
 
 private:

@@ -29,7 +29,7 @@ void AEC_IngredientSpawner::BeginPlay()
 	
 	bUseDataTable = CheckForDataTable();
 	
-	if(ensure(bUseDataTable))
+	if(!bUseDataTable)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("%s has no data-table set. Will behave like an ItemSpawner."), *GetNameSafe(this)));
 	}
@@ -63,21 +63,19 @@ void AEC_IngredientSpawner::SpawnItem()
 			}
 		
 			//find the ingredient corresponding to this spawner
-			const FIngredient* RowStruct = IngredientToSpawnHandler.GetRow<FIngredient>(TEXT(""));
-
-			if(RowStruct)
+			if(const FIngredient* RowStruct = IngredientToSpawnHandler.GetRow<FIngredient>(TEXT("")))
 			{
 				//spawn ingredient item
 				AEC_SerializableIngredient* SpawnedIngredient = Cast<AEC_SerializableIngredient>(UGameplayStatics::BeginDeferredActorSpawnFromClass(GetWorld(),
-					AEC_SerializableIngredient::StaticClass(), FTransform::Identity, ESpawnActorCollisionHandlingMethod::AlwaysSpawn, this));
+					AEC_SerializableIngredient::StaticClass(), RootComponent->GetSocketTransform(ItemSpawnSocketName), ESpawnActorCollisionHandlingMethod::AlwaysSpawn, this));
 		
 				if(IsValid(SpawnedIngredient))
 				{
 					//serialize it and finish spawning it
 					SpawnedIngredient->Init(RowStruct->HUDIcon, RowStruct->Mesh, RowStruct->Type);
-					UGameplayStatics::FinishSpawningActor(SpawnedIngredient, FTransform::Identity);
+					UGameplayStatics::FinishSpawningActor(SpawnedIngredient, RootComponent->GetSocketTransform(ItemSpawnSocketName));
 			
-					AddItemToWorktop(SpawnedIngredient);
+					SetWorktopItem(SpawnedIngredient);
 		
 					//the spawned ingredient will be attached to the spawner, we dont want the player to be able to interact with the ingredient but with the spawner to grab it.
 					SpawnedIngredient->SetCurrentlyInteractable(false, SpawnedIngredient);

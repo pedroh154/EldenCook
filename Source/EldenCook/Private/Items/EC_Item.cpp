@@ -9,8 +9,8 @@ AEC_Item::AEC_Item()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	MeshComponent->SetIsReplicated(true);
 	MeshComponent->SetCollisionProfileName(TEXT("EC_Items"));
+	MeshComponent->SetIsReplicated(true);
 	
 	bReplicates = true;
 	bDrawDebugVars = false;
@@ -37,16 +37,11 @@ void AEC_Item::OnInteract(AEldenCookCharacter* InteractingChar)
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		InteractingChar->EquipItem(this);
-
-		AEC_Item* Item = InteractingChar->GetCurrentItem();
-		if(Item) Item->OnInteract(this); 
+		if(InteractingChar)
+		{
+			InteractingChar->EquipItem(this);
+		}
 	}
-}
-
-void AEC_Item::OnInteract(AEC_Item* Item)
-{
-	IEC_InteractableInterface::OnInteract(Item);
 }
 
 bool AEC_Item::CanInteract(AEldenCookCharacter* InteractingChar)
@@ -60,26 +55,45 @@ void AEC_Item::OnEquip(AEldenCookCharacter* Char)
 {
 	SetOwner(Char);
 	MyPlayer = Char;
+	MyWorktop = nullptr;
 	SetActorEnableCollision(false);
 	SetCurrentlyInteractable(false, this);
+	UE_LOG(LogTemp, Display, TEXT("AEC_Item::OnEquip: equipped %s on %s"), *GetNameSafe(this), *GetNameSafe(MyPlayer))
 }
 
-void AEC_Item::OnUnequip()
+bool AEC_Item::OnUnequip(AEC_Item* NewItem)
 {
+	UE_LOG(LogTemp, Display, TEXT("AEC_Item::OnUnequip: unequipped %s from %s"), *GetNameSafe(this), *GetNameSafe(MyPlayer))
 	SetActorEnableCollision(true);
 	SetOwner(nullptr);
 	MyPlayer = nullptr;
+	MyWorktop = nullptr;
 	SetCurrentlyInteractable(true, this);
+	return true;
 }
 
 void AEC_Item::OnEnterWorktop(AEC_Worktop* Worktop)
 {
+	if(GetLocalRole() == ROLE_Authority)
+		UE_LOG(LogTemp, Display, TEXT("SV - AEC_Item::OnEnterWorktop: %s entering %s"), *GetNameSafe(this), *GetNameSafe(Worktop))
+	else
+		UE_LOG(LogTemp, Display, TEXT("CL - AEC_Item::OnEnterWorktop: %s entering %s"), *GetNameSafe(this), *GetNameSafe(Worktop))
+	
+	SetOwner(Worktop);
 	MyWorktop = Worktop;
+	SetCurrentlyInteractable(false, this);
 }
 
 void AEC_Item::OnLeaveWorktop()
 {
+	if(GetLocalRole() == ROLE_Authority)
+		UE_LOG(LogTemp, Display, TEXT("SV - AEC_Item::OnLeaveWorktop: %s leaving %s"), *GetNameSafe(this), *GetNameSafe(MyWorktop))
+	else
+		UE_LOG(LogTemp, Display, TEXT("CL - AEC_Item::OnLeaveWorktop: %s leaving %s"), *GetNameSafe(this), *GetNameSafe(MyWorktop));
+	
+	SetOwner(nullptr);
 	MyWorktop = nullptr;
+	SetCurrentlyInteractable(true, this);
 }
 
 void AEC_Item::OnEnterPlate(AEC_Plate* Plate)
@@ -101,7 +115,7 @@ void AEC_Item::DrawDebugVars()
 		FColor::Blue, GetWorld()->GetDeltaSeconds(), true, 1);
 }
 
-/* EVENTS ----------------------------------------- END */
+
 
 
 

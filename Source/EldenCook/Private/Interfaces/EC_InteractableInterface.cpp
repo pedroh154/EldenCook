@@ -1,7 +1,11 @@
 #include "Interfaces/EC_InteractableInterface.h"
-
 #include "EldenCook/EldenCook.h"
 #include "Player/EldenCookCharacter.h"
+
+FString DetermineClientSV(AActor* Actor)
+{
+	return Actor->GetLocalRole() == ROLE_Authority ? TEXT("SV - ") : TEXT("CL - ");
+}
 
 void IEC_InteractableInterface::OnHighlighted(AEldenCookCharacter* InteractingChar)
 {
@@ -16,10 +20,6 @@ void IEC_InteractableInterface::OnInteract(AEldenCookCharacter* InteractingChar)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue,
 		FString::Printf(TEXT("Interacting with an object that has no OnInteract() implementation!")));
-}
-
-void IEC_InteractableInterface::OnInteract(AEC_Item* Item)
-{
 }
 
 bool IEC_InteractableInterface::CanInteract(AEldenCookCharacter* InteractingChar)

@@ -48,7 +48,7 @@ void AEldenCookPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(GetNetMode() == NM_ListenServer)
+	if(GetNetMode() != NM_DedicatedServer)
 	{
 		//try switch to level camera. clients will switch OnRep_Pawn, bc pawn replication happens a few moments after begin play, putting it here wouldnt setviewtarget
 		SwitchToLevelCamera();

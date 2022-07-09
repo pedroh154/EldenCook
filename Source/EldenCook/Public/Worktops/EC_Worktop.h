@@ -62,17 +62,22 @@ public:
 
 public:
 	/* ADD ITEM TO WORKTOP -------------------------------------------------------------------------------------------------------------------------- START */
-	virtual void AddItemToWorktop(AEC_Item* Item);
-	virtual void RemoveCurrentItemFromWorktop();
+	virtual void SetWorktopItem(AEC_Item* Item);
 	/* ADD ITEM TO WORKTOP -------------------------------------------------------------------------------------------------------------------------- END */
 
 protected:
 	virtual void SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem);
 
+private:
+	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None);
+	virtual void DetachCurrentItem();
+
 public:
 	virtual void SetInteractingMaterial();
 	virtual void RemoveInteractingMaterial();
 	virtual void ApplyCustomCurrentItemSettings();
+
+	virtual void DrawDebugVars();
 	
 public:
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- START */

@@ -8,6 +8,7 @@ AEC_SerializableIngredient::AEC_SerializableIngredient()
 	HUDIcon = nullptr;
 	bCuts = true;
 	MeshComponent->SetStaticMesh(nullptr);
+	RootComponent = MeshComponent;
 }
 
 void AEC_SerializableIngredient::BeginPlay()

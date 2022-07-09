@@ -16,47 +16,65 @@ void AEC_Plate::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 
 void AEC_Plate::OnInteract(AEldenCookCharacter* InteractingChar)
 {
-	Super::OnInteract(InteractingChar);
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		if(InteractingChar)
+		{
+			//check if character is holding any items
+			//if it is, add it to this and equip this instead
+			if(AEC_Item* Item = InteractingChar->GetCurrentItem())
+			{
+				InteractingChar->DropItem();
+				AddItem(Item);
+				InteractingChar->EquipItem(this);
+			}
+			else
+			{
+				Super::OnInteract(InteractingChar);
+			}
+		}
+	}
 }
 
 void AEC_Plate::OnEquip(AEldenCookCharacter* Char)
 {
-	Super::OnEquip(Char);
-
-	AEC_Item* Item = Char->GetCurrentItem();
+	if(IsValid(Char->GetCurrentItem()))
+	{
+		AddItem(Char->GetCurrentItem());
+	}
 	
-	if(Item)
+	Super::OnEquip(Char);
+}
+
+bool AEC_Plate::OnUnequip(AEC_Item* NewItem)
+{
+	if(NewItem)
 	{
-		AddItem(Item);
+		if(AddItem(NewItem))
+		{
+			return false;
+		}
 	}
+	Super::OnUnequip(NewItem);
+	return true;
 }
 
-void AEC_Plate::OnUnequip()
+bool AEC_Plate::AddItem(AEC_Item* Item, const bool bFromRep)
 {
-	Super::OnUnequip();
-}
-
-void AEC_Plate::OnInteract(AEC_Item* Item)
-{
-	if(Item)
-	{
-		AddItem(Item);
-	}
-}
-
-void AEC_Plate::AddItem(AEC_Item* Item, const bool bFromRep)
-{
-	if(Item && CanAddItem())
+	if(CanAddItem(Item))
 	{
 		if(!bFromRep) Items.Add(Item);
 		AttachItem(Item);
 		Item->OnEnterPlate(this);
+		return true;
 	}
+
+	return false;
 }
 
-bool AEC_Plate::CanAddItem()
+bool AEC_Plate::CanAddItem(AEC_Item* ItemToAdd)
 {
-	return !(Items.Num() == 3);
+	return IsValid(ItemToAdd) && Items.Num() < Slots && ItemToAdd != this && !ItemToAdd->IsA(StaticClass());
 }
 
 void AEC_Plate::DrawDebugVars()

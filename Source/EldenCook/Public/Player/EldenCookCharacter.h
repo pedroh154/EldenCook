@@ -4,7 +4,6 @@
 #include "Interfaces/EC_InteractableInterface.h"
 #include "EldenCookCharacter.generated.h"
 
-
 class AEC_Item;
 
 UCLASS(Blueprintable)
@@ -21,6 +20,11 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
+	/* MOVEMENT -------------------------------------------------------------------------------------------------------------------------- START */
+public:
+	virtual void InputForward(float Val);
+	virtual void InputRight(float Val);
+	/* MOVEMENT -------------------------------------------------------------------------------------------------------------------------- END */
 	
 	/* INTERACT -------------------------------------------------------------------------------------------------------------------------- START */
 public:
@@ -60,8 +64,6 @@ private:
 	UFUNCTION(Server, Reliable, WithValidation)
 	virtual void Server_DropItem();
 	/* DROP ITEM -------------------------------------------------------------------------------------------------------------------------- END */
-	
-
 	
 private:
 	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None);
@@ -105,7 +107,8 @@ protected:
 public:
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	AEC_Item* GetCurrentItem() const { return CurrentItem; };
+	class AEldenCookPlayerController* GetEcController() const;
+	FORCEINLINE class AEC_Item* GetCurrentItem() const { return CurrentItem; };
 };
 
 

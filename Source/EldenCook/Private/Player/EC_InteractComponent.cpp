@@ -5,7 +5,7 @@
 UEC_InteractComponent::UEC_InteractComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	TraceDistanceMultiplier = 750.0f;
+	TraceDistanceMultiplier = 350.0f;
 	TraceCollisionChannel = COLLISION_INTERACTABLE;
 	bDrawDebug = false;
 	SphereRadius = 35.0f;
@@ -24,43 +24,36 @@ void UEC_InteractComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void UEC_InteractComponent::PerformTrace()
 {
-	//set trace params
+	//set trace collision query params
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.bDebugQuery = true;
+
+	//set trace response params
 	const FCollisionResponseParams CollisionResponseParams;
 	FCollisionShape Shape;
+
+	//set trace shape
 	Shape.SetSphere(SphereRadius);
 
-	AActor* HitActor = nullptr;
-	
-	TArray<FHitResult> Temp;
-	
 	//perform trace
+	TArray<FHitResult> Temp;
 	GetWorld()->SweepMultiByChannel(Temp, GetComponentLocation(), GetComponentLocation() + (GetForwardVector() * TraceDistanceMultiplier), FQuat::Identity,
 		TraceCollisionChannel, Shape, CollisionQueryParams, CollisionResponseParams);
 
-	// if(PriorityOrder.Num() > 1 && Temp.Num() > 1)
-	// {
-	// 	for(int32 i = 0; i < Temp.Num(); ++i)
-	// 	{
-	// 		if(Temp[0].GetActor()->GetClass() != PriorityOrder[0])
-	// 		{
-	// 			
-	// 		}
-	// 	}
-	// }
+	//get first hit actor of sweep
+	AActor* HitActor = Temp.Num() > 0 ? Temp[0].GetActor() : nullptr;
 
-	//get first actor hit by the multi trace
-	if(Temp.GetData())
+	//broadcast delegate with new hit and last hit only if they differ
+	if((CurrentHit.Num() > 0 && HitActor != CurrentHit[0].GetActor())
+		||
+		HitActor)
 	{
-		HitActor = Temp.GetData()->GetActor();
-		NewHitActorDelegate.Broadcast(HitActor, CurrentHit.GetData() ? CurrentHit.GetData()->GetActor() : nullptr);
-		CurrentHit = Temp;
+			NewHitActorDelegate.Broadcast(HitActor, CurrentHit.Num() > 0 ? CurrentHit[0].GetActor() : nullptr);
 	}
-	else
-	{
-		CurrentHit = TArray<FHitResult>();
-	}
+
+	
+	//update current hit array
+	CurrentHit = Temp; 
 	
 	if(bDrawDebug)
 	{
@@ -69,29 +62,6 @@ void UEC_InteractComponent::PerformTrace()
 		
 		DrawDebugSphere(GetWorld(), GetComponentLocation() + (GetForwardVector() * TraceDistanceMultiplier), SphereRadius, 32, FColor::Red);
 	}
-	
-	// FHitResult Temp;
-	//
-	// GetWorld()->LineTraceSingleByChannel(Temp, GetComponentLocation(),
-	// 	GetComponentLocation() + (GetForwardVector() * TraceDistanceMultiplier), TraceCollisionChannel, CollisionQueryParams, CollisionResponseParams);
-	//
-	// //get first actor hit by the line trace
-	// HitActor = Temp.GetActor();
-	//
-	// //if its a different actor compared to last frame, broadcast delegate (even if nullptr)
-	// if(Temp.GetActor() != HitActor) NewHitActorDelegate.Broadcast(HitActor, CurrentHit.GetData()->GetActor());
-	//
-	// CurrentHit.Empty();
-	// CurrentHit.Add(Temp);
-
-// 		if(bDrawDebug)
-// 		{
-// 			GEngine->AddOnScreenDebugMessage(-1, 0.02f, FColor::Black,
-// FString::Printf(TEXT("LINE TRACE DEBUG HIT: %s"), Temp.GetComponent() ? *Temp.GetComponent()->GetName() : TEXT("null")));
-//
-// 			DrawDebugLine(GetWorld(), GetComponentLocation(), GetComponentLocation() + (GetForwardVector() * TraceDistanceMultiplier), FColor::Red, false, 0.05f, 0, 2.f);
-// 		}
-	//}
 }
 
 IEC_InteractableInterface* UEC_InteractComponent::GetCurrentHitInteractable()
@@ -100,5 +70,6 @@ IEC_InteractableInterface* UEC_InteractComponent::GetCurrentHitInteractable()
 	{
 		return Cast<IEC_InteractableInterface>(GetCurrentHit().GetData()->GetActor());
 	}
+	
 	return nullptr;
 }

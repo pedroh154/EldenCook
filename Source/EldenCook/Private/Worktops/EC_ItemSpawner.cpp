@@ -31,7 +31,8 @@ void AEC_ItemSpawner::OnConstruction(const FTransform& Transform)
 
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		SpawnItem();
+		//Check if this is not a preview actor. Avoid running this twice OnConstruction(). https://forums.unrealengine.com/t/actor-onconstruction-runs-twice/349114/2
+		if(!HasAnyFlags(RF_Transient)) SpawnItem();
 	}
 }
 
@@ -40,43 +41,38 @@ void AEC_ItemSpawner::SpawnItem()
 	//do it only server side, item will replicate to clients
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		if(!HasAnyFlags(RF_Transient))//Check if this is not a preview actor. Avoid running this twice OnConstruction(). https://forums.unrealengine.com/t/actor-onconstruction-runs-twice/349114/2
-		{ 
-			if(IsValid(CurrentItem))
-			{
-				return;
-			}
+		if(IsValid(CurrentItem))
+		{
+			return;
+		}
+
+		if(ensure(ItemToSpawnClass))
+		{
+			//spawn item (will replicate back to clients)
+			AEC_Item* SpawnedItem = Cast<AEC_Item>(UGameplayStatics::BeginDeferredActorSpawnFromClass(GetWorld(),
+				ItemToSpawnClass, RootComponent->GetSocketTransform(ItemSpawnSocketName), ESpawnActorCollisionHandlingMethod::AlwaysSpawn, this));
 	
-			if(ensure(ItemToSpawnClass))
+			if(IsValid(SpawnedItem))
 			{
-				//since location is in local space, convert it to world-space
-				const FVector WorldLoc = GetActorLocation() + RootComponent->GetSocketLocation(ItemSpawnSocketName);
-		
-				//spawn item (will replicate back to clients)
-				AEC_Item* SpawnedItem = Cast<AEC_Item>(UGameplayStatics::BeginDeferredActorSpawnFromClass(GetWorld(),
-					ItemToSpawnClass, FTransform(WorldLoc), ESpawnActorCollisionHandlingMethod::AlwaysSpawn, this));
-		
-				if(IsValid(SpawnedItem))
-				{
-					//finish spawning it
-					UGameplayStatics::FinishSpawningActor(SpawnedItem, FTransform(WorldLoc));
-					AddItemToWorktop(SpawnedItem);
+				//finish spawning it
+				UGameplayStatics::FinishSpawningActor(SpawnedItem, RootComponent->GetSocketTransform(ItemSpawnSocketName));
+				SetWorktopItem(SpawnedItem);
 
-					SpawnedItem->SetCurrentlyInteractable(false, SpawnedItem);
+				SpawnedItem->SetCurrentlyInteractable(false, SpawnedItem);
 
-					//pause spawn timer until someone picks that item up
-					GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
-
-					//play spawn fx if listen server; will also play on client on OnRep_CurrentSpawnedItem
-					PlaySpawnFX();
-				}
-			}
-			else
-			{
+				//pause spawn timer until someone picks that item up
 				GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
+
+				//play spawn fx if listen server; will also play on client on OnRep_CurrentSpawnedItem
+				if(GetNetMode() != NM_DedicatedServer) PlaySpawnFX();
 			}
 		}
+		else
+		{
+			GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
+		}
 	}
+
 }
 
 /* INTERACT ----------------------------------------- START */
@@ -86,8 +82,8 @@ void AEC_ItemSpawner::OnInteract(AEldenCookCharacter* InteractingChar)
 	{
 		if(GetLocalRole() == ROLE_Authority)
 		{
-			//if character is carrying an item and there is no item here
-			if(InteractingChar->GetCurrentItem() && !CurrentItem)
+			//there is no item here
+			if(!CurrentItem && InteractingChar->GetCurrentItem())
 			{
 				//this will behave like a normal worktop, item will be put here but this will pause the SpawnItem timer and no further spawns will happen
 				//until player takes the item out of here
