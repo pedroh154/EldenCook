@@ -62,8 +62,8 @@ void AEC_Worktop::OnInteract(AEldenCookCharacter* InteractingChar)
 			UE_LOG(LogTemp, Display, TEXT("SV - AEC_Worktop::OnInteract: %s interacting with %s"), *GetNameSafe(InteractingChar), *GetNameSafe(this));
 			AEC_Item* CharItem = InteractingChar->GetCurrentItem();
 			
-			//if there's no item here:
-			if(!CurrentItem && InteractingChar->GetCurrentItem())
+			//if there's no item here && player has item:
+			if(!CurrentItem && CharItem)
 			{
 				UE_LOG(LogTemp, Display, TEXT("SV - AEC_Worktop::OnInteract: %s putting item on %s"), *GetNameSafe(InteractingChar), *GetNameSafe(this));
 				
@@ -154,8 +154,6 @@ void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 	//adding item to worktop
 	if(NewItem && !LocalLastItem)
 	{
-		//make sure item is not owned by anyone else
-
 		UE_LOG(LogTemp, Display, TEXT("AEC_Worktop::SetCurrentItem: %s adding to %s"), *GetNameSafe(NewItem), *GetNameSafe(this));
 		
 		CurrentItem = NewItem;
@@ -168,10 +166,10 @@ void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 	else if(!NewItem && LocalLastItem)
 	{
 		UE_LOG(LogTemp, Display, TEXT("AEC_Worktop::SetCurrentItem: %s removing from %s"), *GetNameSafe(LocalLastItem), *GetNameSafe(this));
-		
+
+		CurrentItem = nullptr;
 		LocalLastItem->OnLeaveWorktop();
 		LocalLastItem->SetActorHiddenInGame(false);
-		CurrentItem = nullptr;
 		ApplyCustomCurrentItemSettings();
 		DetachCurrentItem();
 	}

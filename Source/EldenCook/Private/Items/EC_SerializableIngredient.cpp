@@ -16,9 +16,24 @@ void AEC_SerializableIngredient::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AEC_SerializableIngredient::Init(UTexture2D* NewHUDIcon, UStaticMesh* Mesh, TEnumAsByte<EIngredientTypes> IngType)
+void AEC_SerializableIngredient::Init(const FDataTableRowHandle DataTableRow)
 {
-	this->HUDIcon = NewHUDIcon;
-	MeshComponent->SetStaticMesh(Mesh);
-	Type = IngType;
+	IngredientRow = DataTableRow;
+
+	if(IngredientRow.DataTable)
+	{
+		const FIngredient* RowStruct = DataTableRow.GetRow<FIngredient>(TEXT(""));
+
+		if(RowStruct)
+		{
+			MeshComponent->SetStaticMesh(RowStruct->Mesh);
+			HUDIcon = RowStruct->HUDIcon;
+			Type = RowStruct->Type;
+		}
+	}
+}
+
+FDataTableRowHandle AEC_SerializableIngredient::GetIngredientRow() const
+{
+	return IngredientRow;
 }

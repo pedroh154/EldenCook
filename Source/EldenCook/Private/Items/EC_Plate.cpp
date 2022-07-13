@@ -6,6 +6,7 @@
 AEC_Plate::AEC_Plate()
 {
 	Slots = 3;
+	ItemsSocketName = TEXT("SOCKET_Items");
 }
 
 void AEC_Plate::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -24,9 +25,12 @@ void AEC_Plate::OnInteract(AEldenCookCharacter* InteractingChar)
 			//if it is, add it to this and equip this instead
 			if(AEC_Item* Item = InteractingChar->GetCurrentItem())
 			{
-				InteractingChar->DropItem();
-				AddItem(Item);
-				InteractingChar->EquipItem(this);
+				if(CanAddItem(Item))
+				{
+					//InteractingChar->DropItem(); //not really needed
+					AddItem(Item);
+					InteractingChar->EquipItem(this);
+				}
 			}
 			else
 			{
@@ -55,7 +59,9 @@ bool AEC_Plate::OnUnequip(AEC_Item* NewItem)
 			return false;
 		}
 	}
+	
 	Super::OnUnequip(NewItem);
+	
 	return true;
 }
 

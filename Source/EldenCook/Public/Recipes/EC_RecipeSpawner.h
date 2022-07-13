@@ -8,6 +8,7 @@
 
 class AEC_Recipe;
 enum EIngredientTypes;
+class AEC_DeliverManager;
 
 USTRUCT(BlueprintType)
 struct FRecipeSpawnRules : public FTableRowBase
@@ -43,8 +44,11 @@ public:
 
 class AEC_SerializableIngredient;
 enum EIngredientTypes;
+class AEC_Recipe;
 
-UCLASS()
+/* A class that instantiates EC_Recipes depending on the rules set on SpawnRules.
+ * Only exists on the server, but spawned EC_Recipes are replicated back to clients */
+UCLASS(Abstract, Blueprintable)
 class ELDENCOOK_API AEC_RecipeSpawner : public AActor
 {
 	GENERATED_BODY()
@@ -58,22 +62,34 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	//spawns a new EC_Recipe actor
 	void SpawnNewRecipe();
 
 	//gets ingredients for recipe according to SpawnRules
 	virtual TArray<FIngredient> GetIngredientsForRecipe();
 
 protected:
+	UPROPERTY(EditDefaultsOnly, Category="AEC_RecipeSpawner|Settings")
+	TSubclassOf<AEC_DeliverManager> DeliverManagerClass;
+
+	UPROPERTY(EditDefaultsOnly, Category="AEC_RecipeSpawner|Status")
+	AEC_DeliverManager* DeliverManager;
+
+protected:
 	UPROPERTY()
 	UDataTable* DataTable;
 
+	//TMultiMap is a TMap that allows duplicate keys
+	TMultiMap<FString, AEC_Recipe*> SpawnedRecipes;
+	
 	UPROPERTY(EditAnywhere, Category="AEC_RecipeSpawner|Settings")
 	FRecipeSpawnRules SpawnRules;
 
 	UPROPERTY(EditAnywhere, Category="AEC_RecipeSpawner|Settings")
-	int32 NewRecipeCooldown;
+	float NewRecipeCooldown;
 
-	UPROPERTY(EditAnywhere, Category="AEC_RecipeSpawner|Status")
-	TArray<AEC_Recipe*> SpawnedRecipes;
+public:
+	TMultiMap<FString, AEC_Recipe*> GetSpawnedRecipes();
+	AEC_DeliverManager* GetDeliverManager() const;
 	
 };

@@ -10,7 +10,11 @@
 class AEC_SerializableIngredient;
 struct FIngredient;
 
-UCLASS()
+/* A recipe that can only be instantiated by a RecipeSpawner.
+ * Has an TArray of FIngredients (Ingredients table row struct).
+ * Is replicated to clients.
+ */
+UCLASS(NotBlueprintable)
 class ELDENCOOK_API AEC_Recipe : public AActor
 {
 	GENERATED_BODY()
@@ -26,15 +30,21 @@ protected:
 public:
 	virtual void Init(TArray<FIngredient> NIngredients);
 
-	UFUNCTION()
-	virtual void OnRep_Ingredients();
+	virtual void Deliver();
 
 	UFUNCTION()
 	void NotifyHUD();
 
+	UFUNCTION()
+	virtual void OnRep_Ingredients();
+
 protected:
 	UPROPERTY(VisibleAnywhere, Category="AEC_Recipe|Status", ReplicatedUsing=OnRep_Ingredients, BlueprintReadOnly)
 	TArray<FIngredient> Ingredients;
+	
+public:
+	TArray<FIngredient> GetIngredients() const;
+	FString GetRecipeKey();
 };
 
 

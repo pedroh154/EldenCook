@@ -17,6 +17,17 @@ void AEC_Recipe::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AEC_Recipe::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void AEC_Recipe::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AEC_Recipe, Ingredients)
+}
+
 void AEC_Recipe::Init(const TArray<FIngredient> NIngredients)
 {
 	Ingredients = NIngredients;
@@ -25,6 +36,11 @@ void AEC_Recipe::Init(const TArray<FIngredient> NIngredients)
 	{
 		NotifyHUD();
 	}
+}
+
+void AEC_Recipe::Deliver()
+{
+	Destroy();
 }
 
 void AEC_Recipe::OnRep_Ingredients()
@@ -45,14 +61,22 @@ void AEC_Recipe::NotifyHUD()
 	}
 }
 
-void AEC_Recipe::Tick(float DeltaTime)
+TArray<FIngredient> AEC_Recipe::GetIngredients() const
 {
-	Super::Tick(DeltaTime);
+	return Ingredients;
 }
 
-void AEC_Recipe::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+FString AEC_Recipe::GetRecipeKey()
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AEC_Recipe, Ingredients)
+	FString Key = FString(TEXT(""));
+	
+	//add the recipe to the spawned recipes to the map, forming its key using its ingredients:
+	for(int32 i = 0; i < Ingredients.Num(); ++i)
+	{
+		Key = Key.Append(Ingredients[i].UniqueID.ToString());
+	}
+
+	return Key;
 }
+
 

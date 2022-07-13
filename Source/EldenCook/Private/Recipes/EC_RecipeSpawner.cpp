@@ -2,7 +2,9 @@
 #include "Items/EC_SerializableIngredient.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Recipes/EC_DeliverManager.h"
 #include "Recipes/EC_Recipe.h"
+
 
 AEC_RecipeSpawner::AEC_RecipeSpawner()
 {
@@ -16,6 +18,8 @@ AEC_RecipeSpawner::AEC_RecipeSpawner()
 	}
 
 	NewRecipeCooldown = 2.0f;
+
+	SetActorEnableCollision(false);
 }
 
 void AEC_RecipeSpawner::Tick(float DeltaTime)
@@ -34,11 +38,26 @@ void AEC_RecipeSpawner::OnConstruction(const FTransform& Transform)
 void AEC_RecipeSpawner::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		FTimerHandle TimerHandle;
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &AEC_RecipeSpawner::SpawnNewRecipe, NewRecipeCooldown + 0.01f, true, 2.0f);
+		if(ensureAlways(DeliverManagerClass))
+		{
+			FActorSpawnParameters SpawnParameters;
+			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			DeliverManager = GetWorld()->SpawnActor<AEC_DeliverManager>(DeliverManagerClass, SpawnParameters);
+			DeliverManager->Init(this);
+
+			if(DeliverManager)
+			{
+				FTimerHandle TimerHandle;
+				GetWorldTimerManager().SetTimer(TimerHandle, this, &AEC_RecipeSpawner::SpawnNewRecipe, NewRecipeCooldown + 0.01f, true, 2.0f);
+			}
+		}
+	}
+	else
+	{
+		Destroy();
 	}
 }
 
@@ -47,12 +66,30 @@ void AEC_RecipeSpawner::SpawnNewRecipe()
 	//spawn item (will replicate back to clients)
 	AEC_Recipe* Recipe = Cast<AEC_Recipe>(UGameplayStatics::BeginDeferredActorSpawnFromClass(GetWorld(),
 		AEC_Recipe::StaticClass(), FTransform::Identity, ESpawnActorCollisionHandlingMethod::AlwaysSpawn, this));
-
+	
 	if(Recipe)
 	{
+		//init recipe with random ingredients based on this spawner's settings
 		Recipe->Init(GetIngredientsForRecipe());
-		SpawnedRecipes.Add(Recipe);
-		UGameplayStatics::FinishSpawningActor(Recipe, FTransform::Identity);
+
+		//get ingredients of spawned recipe
+		const TArray<FIngredient> RecipeIngredients = Recipe->GetIngredients();
+
+		if(RecipeIngredients.Num() > 0)
+		{
+			SpawnedRecipes.Add(Recipe->GetRecipeKey(), Recipe);
+			UGameplayStatics::FinishSpawningActor(Recipe, FTransform::Identity);
+
+			for (auto It = SpawnedRecipes.CreateConstIterator(); It; ++It)
+			{
+				//crashes sometimes
+				//FPlatformMisc::LocalPrint(*FString::Printf(TEXT("%s, %s\n"), *It.Key(), *It.Value()->GetName()));
+			}
+		}
+		else
+		{
+			Recipe->Destroy();
+		}
 	}
 }
 
@@ -174,6 +211,16 @@ TArray<FIngredient> AEC_RecipeSpawner::GetIngredientsForRecipe()
 	}
 	
 	return ChosenIngredients;
+}
+
+AEC_DeliverManager* AEC_RecipeSpawner::GetDeliverManager() const
+{
+	return DeliverManager;
+}
+
+TMultiMap<FString, AEC_Recipe*> AEC_RecipeSpawner::GetSpawnedRecipes()
+{
+	return SpawnedRecipes;
 }
 
 

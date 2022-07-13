@@ -37,6 +37,7 @@ public:
 	
 };
 
+/* A representation of an ingredient in the world. Must be spawned by an EC_IngredientSpawner, cannot be directly placed. */
 UCLASS(NotBlueprintable, NotPlaceable)
 class ELDENCOOK_API AEC_SerializableIngredient : public AEC_Item
 {
@@ -55,7 +56,12 @@ protected:
 
 	UPROPERTY()
 	bool bCuts;
+
+	//what data table and which row of this data table has the data of this ingredient?
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="AEC_SerializableIngredient|Status")
+	FDataTableRowHandle IngredientRow;
 	
 public:
-	virtual void Init(UTexture2D* NewHUDIcon, UStaticMesh* Mesh, TEnumAsByte<EIngredientTypes> IngType);
+	virtual void Init(FDataTableRowHandle DataTableRow);
+	FDataTableRowHandle GetIngredientRow() const;
 };

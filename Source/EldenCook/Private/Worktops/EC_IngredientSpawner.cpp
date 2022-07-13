@@ -61,30 +61,26 @@ void AEC_IngredientSpawner::SpawnItem()
 				Super::SpawnItem();
 				return;
 			}
-		
-			//find the ingredient corresponding to this spawner
-			if(const FIngredient* RowStruct = IngredientToSpawnHandler.GetRow<FIngredient>(TEXT("")))
+			
+			//spawn ingredient item
+			AEC_SerializableIngredient* SpawnedIngredient = Cast<AEC_SerializableIngredient>(UGameplayStatics::BeginDeferredActorSpawnFromClass(GetWorld(),
+				AEC_SerializableIngredient::StaticClass(), RootComponent->GetSocketTransform(ItemSpawnSocketName), ESpawnActorCollisionHandlingMethod::AlwaysSpawn, this));
+	
+			if(IsValid(SpawnedIngredient))
 			{
-				//spawn ingredient item
-				AEC_SerializableIngredient* SpawnedIngredient = Cast<AEC_SerializableIngredient>(UGameplayStatics::BeginDeferredActorSpawnFromClass(GetWorld(),
-					AEC_SerializableIngredient::StaticClass(), RootComponent->GetSocketTransform(ItemSpawnSocketName), ESpawnActorCollisionHandlingMethod::AlwaysSpawn, this));
+				//serialize it and finish spawning it
+				SpawnedIngredient->Init(IngredientToSpawnHandler);
+				UGameplayStatics::FinishSpawningActor(SpawnedIngredient, RootComponent->GetSocketTransform(ItemSpawnSocketName));
 		
-				if(IsValid(SpawnedIngredient))
-				{
-					//serialize it and finish spawning it
-					SpawnedIngredient->Init(RowStruct->HUDIcon, RowStruct->Mesh, RowStruct->Type);
-					UGameplayStatics::FinishSpawningActor(SpawnedIngredient, RootComponent->GetSocketTransform(ItemSpawnSocketName));
-			
-					SetWorktopItem(SpawnedIngredient);
-		
-					//the spawned ingredient will be attached to the spawner, we dont want the player to be able to interact with the ingredient but with the spawner to grab it.
-					SpawnedIngredient->SetCurrentlyInteractable(false, SpawnedIngredient);
+				SetWorktopItem(SpawnedIngredient);
+	
+				//the spawned ingredient will be attached to the spawner, we dont want the player to be able to interact with the ingredient but with the spawner to grab it.
+				SpawnedIngredient->SetCurrentlyInteractable(false, SpawnedIngredient);
 
-					//pause spawn timer until someone picks that ingredient up
-					GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
-			
-					PlaySpawnFX();
-				}
+				//pause spawn timer until someone picks that ingredient up
+				GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
+		
+				PlaySpawnFX();
 			}
 		}
 	}

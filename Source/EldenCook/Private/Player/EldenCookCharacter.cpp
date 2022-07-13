@@ -179,19 +179,16 @@ void AEldenCookCharacter::Server_Interact_Implementation(AActor* Interactable)
 /* EQUIP ITEM ----------------------------------------- START */
 void AEldenCookCharacter::EquipItem(AEC_Item* Item)
 {
-	if(IsValid(Item))
+	if(CanEquipItem())
 	{
-		if(CanEquipItem())
+		if(GetLocalRole() == ROLE_Authority)
 		{
-			if(GetLocalRole() == ROLE_Authority)
-			{
-				UE_LOG(LogTemp, Display, TEXT("SV - AEldenCookCharacter::EquipItem: %s equipping %s"), *GetNameSafe(this), *GetNameSafe(Item));
-				SetCurrentItem(Item, CurrentItem);
-			}
-			else
-			{
-				Server_EquipItem(Item);
-			}
+			UE_LOG(LogTemp, Display, TEXT("SV - AEldenCookCharacter::EquipItem: %s equipping %s"), *GetNameSafe(this), *GetNameSafe(Item));
+			SetCurrentItem(Item, CurrentItem);
+		}
+		else
+		{
+			Server_EquipItem(Item);
 		}
 	}
 }
@@ -233,24 +230,30 @@ void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 	}
 
 	if(GetLocalRole() == ROLE_Authority)
-		UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: called on server"))
+		UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: called on server:"))
 	else
-		UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: called on client by onrep_ event"))
+		UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: called on client by onrep_ event:"))
 
-	UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: trying to unequip last item"))
+	UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: -> trying to unequip last item"))
 	
 	//try unequip our LastItem
 	if(IsValid(LocalLastItem))
 	{
-		//try unequip previous
 		if(LocalLastItem->OnUnequip(NewItem))
 		{
 			DetachCurrentItem();
+			UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: -> unequiped %s"), *GetNameSafe((LocalLastItem)))
+		}
+		else
+		{
+			UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: -> failed to unequip last item %s"), *GetNameSafe((LocalLastItem)))
 		}
 	}
-
-	CurrentItem = NewItem;
-
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: -> no item to unequip"))
+	}
+	
 	UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: trying to equip new item"))
 	
 	//Try equip our NewItem
@@ -258,7 +261,14 @@ void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 	{
 		NewItem->OnEquip(this);
 		AttachItem(NewItem, HandsSocketName);
+		UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: equipped %s"), *GetNameSafe(NewItem))
 	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: no item to equip, CurrentItem will be set to nullptr"))
+	}
+	
+	CurrentItem = NewItem;
 }
 
 /* DROP ITEM ----------------------------------------- START */

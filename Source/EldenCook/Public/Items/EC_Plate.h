@@ -23,6 +23,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Items)
 	TArray<AEC_Item*> Items;
 
+protected:
 	UPROPERTY(EditAnywhere, Category="AEC_Plate|Settings")
 	FName ItemsSocketName;
 
@@ -50,5 +51,11 @@ private:
 public:
 	UFUNCTION()
 	virtual void OnRep_Items();
+
+public:
+	TArray<AEC_Item*> GetItems() const
+	{
+		return Items;
+	}
 	
 };
