@@ -41,7 +41,7 @@ private:
 	
 	/* EQUIP ITEM -------------------------------------------------------------------------------------------------------------------------- START */
 public:
-	virtual void EquipItem(AEC_Item* Item);
+	virtual bool EquipItem(AEC_Item* Item);
 	bool CanEquipItem() const;
 	
 private:

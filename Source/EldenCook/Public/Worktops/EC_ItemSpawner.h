@@ -35,6 +35,8 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_PlaySpawnFX();
+
+	virtual void ApplyCustomCurrentItemSettings();
 	
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- START */
 public:
@@ -56,6 +58,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="AEC_ItemSpawner|Settings|FX")
 	TArray<USoundBase*> ItemSpawnSFX;
+	
+	UPROPERTY(EditDefaultsOnly, Category="AEC_Worktop|Settings")
+	FCustomWorktopConfig CustomConfig;
+
+private:
+	UPROPERTY()
+	UStaticMeshComponent* CustomCurrentItemMeshComp;
 	
 };
 

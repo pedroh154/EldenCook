@@ -22,7 +22,7 @@ void IEC_InteractableInterface::OnInteract(AEldenCookCharacter* InteractingChar)
 		FString::Printf(TEXT("Interacting with an object that has no OnInteract() implementation!")));
 }
 
-void IEC_InteractableInterface::OnInteractAnotherItem(AEC_Item* Item)
+void IEC_InteractableInterface::OnInteractAnotherInteractable(IEC_InteractableInterface* Interactable)
 {
 }
 
@@ -40,4 +40,16 @@ void IEC_InteractableInterface::SetCurrentlyInteractable(bool bInteractable, AAc
 		!bInteractable ? Primitive->SetCollisionResponseToChannel(COLLISION_INTERACTABLE, ECR_Ignore) :
 			Primitive->SetCollisionResponseToChannel(COLLISION_INTERACTABLE, ECR_Block);
 	}
+}
+
+bool IEC_InteractableInterface::IsCurrentlyInteractable(AActor* Interactable)
+{
+	ECollisionResponse Response = ECR_Ignore;
+
+	if(Interactable)
+	{
+		Response = Interactable->GetRootComponent()->GetCollisionResponseToChannel(COLLISION_INTERACTABLE);
+	}
+	
+	return !(Response == ECollisionResponse::ECR_Ignore);
 }

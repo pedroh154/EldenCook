@@ -49,7 +49,7 @@ void AEC_Worktop::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 void AEC_Worktop::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	ApplyCustomCurrentItemSettings();
+	
 }
 
 /* INTERACT ----------------------------------------- START */
@@ -60,26 +60,47 @@ void AEC_Worktop::OnInteract(AEldenCookCharacter* InteractingChar)
 		if(GetLocalRole() == ROLE_Authority)
 		{
 			UE_LOG(LogTemp, Display, TEXT("SV - AEC_Worktop::OnInteract: %s interacting with %s"), *GetNameSafe(InteractingChar), *GetNameSafe(this));
-			AEC_Item* CharItem = InteractingChar->GetCurrentItem();
-			
-			//if there's no item here && player has item:
-			if(!CurrentItem && CharItem)
+
+			//char has item:
+			if(AEC_Item* CharItem = InteractingChar->GetCurrentItem())
 			{
-				UE_LOG(LogTemp, Display, TEXT("SV - AEC_Worktop::OnInteract: %s putting item on %s"), *GetNameSafe(InteractingChar), *GetNameSafe(this));
-				
-				InteractingChar->DropItem(); //try to tell the char to drop its item
-				SetWorktopItem(CharItem); //try to add the dropped item here
+				//there's no item here
+				if(!CurrentItem)
+				{
+					//char puts the item here
+					InteractingChar->DropItem();
+					SetWorktopItem(CharItem);
+					
+					UE_LOG(LogTemp, Display, TEXT("SV - AEC_Worktop::OnInteract: %s putting item on %s"), *GetNameSafe(InteractingChar), *GetNameSafe(this));
+				}
+				//there is item here and char has item
+				else
+				{
+					//nothing will happen, char needs to drop the item in order to grab item from here
+
+					//but maybe the item it is holding has some way of dealing with this conflict:
+					CharItem->OnInteractAnotherInteractable(CurrentItem);
+
+					if(CurrentItem) /* could be null because we don't know what char item has done to current item */
+					{
+						//or maybe the item here has some way of dealing with this conflict
+						CurrentItem->OnInteractAnotherInteractable(CharItem);
+					}
+				}
 			}
 			
-			//if there is an item here and char has no item:
-			else if (!CharItem && CurrentItem)
+			//char has no item:
+			else
 			{
-				UE_LOG(LogTemp, Display, TEXT("SV - AEC_Worktop::OnInteract: %s taking item from %s"), *GetNameSafe(InteractingChar), *GetNameSafe(this));
-				
-				AEC_Item* Helper = CurrentItem;
-				
-				SetWorktopItem(nullptr);
-				InteractingChar->EquipItem(Helper); //try to add it to the character
+				//there is an item here
+				if (CurrentItem)
+				{
+					//give item to char
+					UE_LOG(LogTemp, Display, TEXT("SV - AEC_Worktop::OnInteract: %s taking item from %s"), *GetNameSafe(InteractingChar), *GetNameSafe(this));
+					AEC_Item* Helper = CurrentItem;
+					SetWorktopItem(nullptr);
+					InteractingChar->EquipItem(Helper); //try to add it to the character
+				}
 			}
 		}
 	}
@@ -158,8 +179,7 @@ void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 		
 		CurrentItem = NewItem;
 		CurrentItem->OnEnterWorktop(this);
-
-		ApplyCustomCurrentItemSettings();
+		
 		AttachItem(NewItem, ItemSpawnSocketName);
 	}
 	//removing item from worktop
@@ -170,7 +190,6 @@ void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 		CurrentItem = nullptr;
 		LocalLastItem->OnLeaveWorktop();
 		LocalLastItem->SetActorHiddenInGame(false);
-		ApplyCustomCurrentItemSettings();
 		DetachCurrentItem();
 	}
 }
@@ -202,71 +221,6 @@ void AEC_Worktop::RemoveInteractingMaterial()
 	}
 }
 
-void AEC_Worktop::ApplyCustomCurrentItemSettings()
-{
-	if(IsValid(CurrentItem))
-	{
-		if(IsValid(CustomConfig.CustomItemMesh))
-		{
-			if(!IsValid(CustomCurrentItemMeshComp))
-			{
-				CustomCurrentItemMeshComp = NewObject<UStaticMeshComponent>(this);
-				CustomCurrentItemMeshComp->RegisterComponent();
-				CustomCurrentItemMeshComp->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, ItemSpawnSocketName);
-			}
-			
-			CustomCurrentItemMeshComp->SetStaticMesh(CustomConfig.CustomItemMesh);
-			CustomCurrentItemMeshComp->SetWorldLocation(RootComponent->GetSocketLocation(ItemSpawnSocketName) + GetActorLocation());
-			CurrentItem->SetActorHiddenInGame(true);
-		}
-		else
-		{
-			if(IsValid(CustomCurrentItemMeshComp)) CustomCurrentItemMeshComp->DestroyComponent();
-			CurrentItem->SetActorHiddenInGame(false);
-		}
-	
-		if(!CustomConfig.bShowItemMesh)
-		{
-			if(IsValid(CustomCurrentItemMeshComp))
-			{
-				CustomCurrentItemMeshComp->SetHiddenInGame(true);
-				CustomCurrentItemMeshComp->SetVisibility(false);
-			}
-			else
-			{
-				CurrentItem->SetActorHiddenInGame(true);
-			}
-		}
-		else
-		{
-			if(IsValid(CustomCurrentItemMeshComp))
-			{
-				CustomCurrentItemMeshComp->SetHiddenInGame(false);
-				CustomCurrentItemMeshComp->SetVisibility(true);
-			}
-			else
-			{
-				CurrentItem->SetActorHiddenInGame(false);
-			}
-		}
-
-		if(CustomConfig.CustomItemSize != FVector::ZeroVector)
-		{
-			if(IsValid(CustomCurrentItemMeshComp)) CustomCurrentItemMeshComp->SetWorldScale3D(CustomConfig.CustomItemSize);
-			CurrentItem->SetActorScale3D(CustomConfig.CustomItemSize);
-		}
-		else
-		{
-			CurrentItem->SetActorScale3D(FVector(1.0f, 1.0f, 1.0f));
-			//CurrentItem->SetActorRelativeLocation(FVector::ZeroVector);
-			if(IsValid(CustomCurrentItemMeshComp)) CustomCurrentItemMeshComp->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
-		}
-	}
-	else
-	{
-		if(IsValid(CustomCurrentItemMeshComp)) CustomCurrentItemMeshComp->DestroyComponent();
-	}
-}
 
 void AEC_Worktop::DrawDebugVars()
 {

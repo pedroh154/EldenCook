@@ -75,7 +75,6 @@ private:
 public:
 	virtual void SetInteractingMaterial();
 	virtual void RemoveInteractingMaterial();
-	virtual void ApplyCustomCurrentItemSettings();
 
 	virtual void DrawDebugVars();
 	
@@ -98,13 +97,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="AEC_Worktop|Status", ReplicatedUsing=OnRep_CurrentItem)
 	AEC_Item* CurrentItem;
 
-	UPROPERTY(EditDefaultsOnly, Category="AEC_Worktop|Settings")
-	FCustomWorktopConfig CustomConfig;
-
-private:
-	UPROPERTY()
-	UStaticMeshComponent* CustomCurrentItemMeshComp;
-
 protected:
 	UPROPERTY(EditAnywhere, Category="AEC_Worktop|Settings|FX")
 	UMaterialInstance* MaterialWhileInteracting;
@@ -116,5 +108,7 @@ protected:
 private:
 	UPROPERTY()
 	UMaterialInterface* PreviousMaterial;
-	
+
+public:
+	AEC_Item* GetCurrentItem() const {return CurrentItem;};
 };

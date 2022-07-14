@@ -177,7 +177,7 @@ void AEldenCookCharacter::Server_Interact_Implementation(AActor* Interactable)
 /* INTERACT ----------------------------------------- END */
 
 /* EQUIP ITEM ----------------------------------------- START */
-void AEldenCookCharacter::EquipItem(AEC_Item* Item)
+bool AEldenCookCharacter::EquipItem(AEC_Item* Item)
 {
 	if(CanEquipItem())
 	{
@@ -185,17 +185,20 @@ void AEldenCookCharacter::EquipItem(AEC_Item* Item)
 		{
 			UE_LOG(LogTemp, Display, TEXT("SV - AEldenCookCharacter::EquipItem: %s equipping %s"), *GetNameSafe(this), *GetNameSafe(Item));
 			SetCurrentItem(Item, CurrentItem);
+			return true;
 		}
 		else
 		{
 			Server_EquipItem(Item);
 		}
 	}
+
+	return false;
 }
 
 bool AEldenCookCharacter::CanEquipItem() const
 {
-	return true;
+	return GetCurrentItem() == nullptr;
 }
 
 void AEldenCookCharacter::Server_EquipItem_Implementation(AEC_Item* Item)

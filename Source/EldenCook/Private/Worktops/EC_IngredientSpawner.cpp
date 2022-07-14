@@ -81,6 +81,8 @@ void AEC_IngredientSpawner::SpawnItem()
 				GetWorldTimerManager().PauseTimer(ItemSpawnCooldownTimerManager);
 		
 				PlaySpawnFX();
+
+				ApplyCustomCurrentItemSettings();
 			}
 		}
 	}

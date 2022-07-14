@@ -33,7 +33,7 @@ protected:
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
 public:
 	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
-	virtual void OnInteractAnotherItem(AEC_Item* Item) override;
+	virtual void OnInteractAnotherInteractable(IEC_InteractableInterface* Interactable) override;
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
 	
 private:

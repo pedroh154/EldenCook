@@ -2,6 +2,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Items/EC_SerializableIngredient.h"
 #include "Player/EldenCookCharacter.h"
+#include "Worktops/EC_Worktop.h"
 
 AEC_Plate::AEC_Plate()
 {
@@ -27,9 +28,9 @@ void AEC_Plate::OnInteract(AEldenCookCharacter* InteractingChar)
 			{
 				if(CanAddItem(Item))
 				{
-					//InteractingChar->DropItem(); //not really needed
-					InteractingChar->EquipItem(this);
+					InteractingChar->DropItem();
 					AddItem(Item);
+					InteractingChar->EquipItem(this);
 				}
 			}
 			//if char has no items, just equip this
@@ -41,13 +42,26 @@ void AEC_Plate::OnInteract(AEldenCookCharacter* InteractingChar)
 	}
 }
 
-void AEC_Plate::OnInteractAnotherItem(AEC_Item* Item)
+void AEC_Plate::OnInteractAnotherInteractable(IEC_InteractableInterface* Interactable)
 {
-	if(Item)
+	if(AEC_Item* Item = Cast<AEC_Item>(Interactable))
 	{
 		if(CanAddItem(Item))
 		{
-			AddItem(Item);
+			if(MyPlayer)
+			{
+				if(Item->GetMyWorktop())
+				{
+					Item->GetMyWorktop()->SetWorktopItem(nullptr);
+				}
+				
+				AddItem(Item);
+			}
+			else if(MyWorktop)
+			{
+				Item->GetMyPlayer()->DropItem();
+				AddItem(Item);
+			}
 		}
 	}
 }
