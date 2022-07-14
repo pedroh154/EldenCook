@@ -33,10 +33,8 @@ protected:
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
 public:
 	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
+	virtual void OnInteractAnotherItem(AEC_Item* Item) override;
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
-
-	virtual void OnEquip(AEldenCookCharacter* Char) override;
-	virtual bool OnUnequip(AEC_Item* NewItem) override;
 	
 private:
 	virtual bool AddItem(AEC_Item* Ingredient, bool bFromRep = false);

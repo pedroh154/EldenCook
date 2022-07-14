@@ -6,6 +6,7 @@
 #include "EC_ItemSpawner.generated.h"
 
 //An EC_Item spawner that spawns the EC_Item at the ItemSpawnLocation
+//also works as a normal worktop, and can have items placed at the top of it
 UCLASS(Abstract)
 class ELDENCOOK_API AEC_ItemSpawner : public AEC_Worktop, public IEC_ItemSpawnerInterface
 {

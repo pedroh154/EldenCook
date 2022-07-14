@@ -39,7 +39,16 @@ void AEC_Item::OnInteract(AEldenCookCharacter* InteractingChar)
 	{
 		if(InteractingChar)
 		{
-			InteractingChar->EquipItem(this);
+			//if character is holding an item, let the item it is holding decide what should happen
+			if(AEC_Item* CurrentCharItem = InteractingChar->GetCurrentItem())
+			{
+				CurrentCharItem->OnInteractAnotherItem(this);
+			}
+			//if it's not, equip this already.
+			else
+			{
+				InteractingChar->EquipItem(this);
+			}
 		}
 	}
 }

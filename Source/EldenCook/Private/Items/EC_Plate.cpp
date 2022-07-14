@@ -22,16 +22,17 @@ void AEC_Plate::OnInteract(AEldenCookCharacter* InteractingChar)
 		if(InteractingChar)
 		{
 			//check if character is holding any items
-			//if it is, add it to this and equip this instead
+			//if it is, equip this and add item to this
 			if(AEC_Item* Item = InteractingChar->GetCurrentItem())
 			{
 				if(CanAddItem(Item))
 				{
 					//InteractingChar->DropItem(); //not really needed
-					AddItem(Item);
 					InteractingChar->EquipItem(this);
+					AddItem(Item);
 				}
 			}
+			//if char has no items, just equip this
 			else
 			{
 				Super::OnInteract(InteractingChar);
@@ -40,29 +41,15 @@ void AEC_Plate::OnInteract(AEldenCookCharacter* InteractingChar)
 	}
 }
 
-void AEC_Plate::OnEquip(AEldenCookCharacter* Char)
+void AEC_Plate::OnInteractAnotherItem(AEC_Item* Item)
 {
-	if(IsValid(Char->GetCurrentItem()))
+	if(Item)
 	{
-		AddItem(Char->GetCurrentItem());
-	}
-	
-	Super::OnEquip(Char);
-}
-
-bool AEC_Plate::OnUnequip(AEC_Item* NewItem)
-{
-	if(NewItem)
-	{
-		if(AddItem(NewItem))
+		if(CanAddItem(Item))
 		{
-			return false;
+			AddItem(Item);
 		}
 	}
-	
-	Super::OnUnequip(NewItem);
-	
-	return true;
 }
 
 bool AEC_Plate::AddItem(AEC_Item* Item, const bool bFromRep)

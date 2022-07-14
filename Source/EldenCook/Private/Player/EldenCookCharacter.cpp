@@ -239,15 +239,9 @@ void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 	//try unequip our LastItem
 	if(IsValid(LocalLastItem))
 	{
-		if(LocalLastItem->OnUnequip(NewItem))
-		{
-			DetachCurrentItem();
-			UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: -> unequiped %s"), *GetNameSafe((LocalLastItem)))
-		}
-		else
-		{
-			UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: -> failed to unequip last item %s"), *GetNameSafe((LocalLastItem)))
-		}
+		LocalLastItem->OnUnequip(NewItem);
+		DetachCurrentItem();
+		UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: -> unequiped %s"), *GetNameSafe((LocalLastItem)))
 	}
 	else
 	{
@@ -255,7 +249,7 @@ void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 	}
 	
 	UE_LOG(LogTemp, Display, TEXT("AEldenCookCharacter::SetCurrentItem: trying to equip new item"))
-	
+
 	//Try equip our NewItem
 	if(IsValid(NewItem))
 	{
