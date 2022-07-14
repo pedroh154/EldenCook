@@ -3,3 +3,5 @@ Grab item from worktop: Client WORKING sv WORKING
 drop item: Client WORKING sv WORKING
 exhange items ground: Client WORKING sv WORKING
 
+plate:
+pick plate on ground while item on hand: Client WORKING sv WORKING
