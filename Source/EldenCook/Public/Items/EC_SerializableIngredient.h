@@ -25,13 +25,13 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Description;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UTexture2D* HUDIcon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UStaticMesh* Mesh;
-
+	TSoftObjectPtr<UStaticMesh> Mesh;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TEnumAsByte<EIngredientTypes> Type;
 	
@@ -46,6 +46,8 @@ public:
 	AEC_SerializableIngredient();
 
 	virtual void BeginPlay() override;
+
+	virtual void LazyLoad();
 
 protected:
 	UPROPERTY(BlueprintReadOnly)

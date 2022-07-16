@@ -82,6 +82,8 @@ void AEC_RecipeSpawner::SpawnNewRecipe()
 			SpawnedRecipes.Add(Recipe->GetRecipeKey(), Recipe);
 			UGameplayStatics::FinishSpawningActor(Recipe, FTransform::Identity);
 
+			OnRecipeSpawnedDelegate.Broadcast(Recipe);
+
 			for (auto It = SpawnedRecipes.CreateConstIterator(); It; ++It)
 			{
 				//crashes sometimes

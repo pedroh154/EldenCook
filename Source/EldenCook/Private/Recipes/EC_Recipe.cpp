@@ -21,8 +21,6 @@ void AEC_Recipe::BeginPlay()
 	// 	
 	// 	Destroy();
 	// }
-	
-	OnRecipeSpawnedDelegate.Broadcast(this);
 }
 
 void AEC_Recipe::Tick(float DeltaTime)
@@ -40,6 +38,8 @@ void AEC_Recipe::Init(const TArray<FIngredient> NIngredients, AEC_RecipeSpawner*
 {
 	Ingredients = NIngredients;
 	MyRecipeSpawner = RecipeSpawner;
+
+	
 }
 
 void AEC_Recipe::Deliver()

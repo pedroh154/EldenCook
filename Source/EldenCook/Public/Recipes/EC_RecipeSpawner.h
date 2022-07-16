@@ -1,13 +1,15 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-#include "GameFramework/Actor.h"
+#include "GameFramework/Info.h"
 #include "Items/EC_SerializableIngredient.h"
 #include "EC_RecipeSpawner.generated.h"
 
 class AEC_Recipe;
 enum EIngredientTypes;
 class AEC_DeliverManager;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRecipeSpawned, AEC_Recipe*, SpawnedRecipe);
 
 USTRUCT(BlueprintType)
 struct FRecipeSpawnRules : public FTableRowBase
@@ -51,7 +53,7 @@ class AEC_Recipe;
  * by this spawner.
  */
 UCLASS(Abstract, Blueprintable)
-class ELDENCOOK_API AEC_RecipeSpawner : public AActor
+class ELDENCOOK_API AEC_RecipeSpawner : public AInfo
 {
 	GENERATED_BODY()
 	
@@ -91,5 +93,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="AEC_RecipeSpawner|Settings")
 	float NewRecipeCooldown;
+
+public:
+	UPROPERTY(BlueprintReadOnly, BlueprintAssignable)
+	FOnRecipeSpawned OnRecipeSpawnedDelegate;
 	
 };

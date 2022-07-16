@@ -26,10 +26,20 @@ void AEC_SerializableIngredient::Init(const FDataTableRowHandle DataTableRow)
 
 		if(RowStruct)
 		{
-			MeshComponent->SetStaticMesh(RowStruct->Mesh);
 			HUDIcon = RowStruct->HUDIcon;
 			Type = RowStruct->Type;
+			LazyLoad();
 		}
+	}
+}
+
+void AEC_SerializableIngredient::LazyLoad()
+{
+	const FIngredient* RowStruct = IngredientRow.GetRow<FIngredient>(TEXT(""));
+
+	if(RowStruct->Mesh.IsPending())
+	{
+		MeshComponent->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, *RowStruct->Mesh.ToSoftObjectPath().ToString()));
 	}
 }
 

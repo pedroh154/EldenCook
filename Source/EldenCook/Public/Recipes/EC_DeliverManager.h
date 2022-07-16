@@ -1,7 +1,7 @@
 #pragma once
-#include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 
+#include "CoreMinimal.h"
+#include "GameFramework/Info.h"
 #include "EC_DeliverManager.generated.h"
 
 class AEC_RecipeSpawner;
@@ -13,7 +13,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRecipeDelivered, AEC_Recipe*, De
 
 /* Exists on client and server, responsible for delivering done recipes */
 UCLASS(NotBlueprintable, NotPlaceable)
-class ELDENCOOK_API AEC_DeliverManager : public AActor
+class ELDENCOOK_API AEC_DeliverManager : public AInfo
 {
 	GENERATED_BODY()
 

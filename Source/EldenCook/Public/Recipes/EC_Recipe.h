@@ -1,12 +1,10 @@
 #pragma once
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "GameFramework/Info.h"
 #include "Items/EC_SerializableIngredient.h"
 #include "EC_Recipe.generated.h"
 
 class AEC_Recipe;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRecipeSpawned, AEC_Recipe*, SpawnedRecipe);
 
 class AEC_SerializableIngredient;
 struct FIngredient;
@@ -17,7 +15,7 @@ class AEC_RecipeSpawner;
  * Is replicated to clients.
  */
 UCLASS(NotBlueprintable, NotPlaceable)
-class ELDENCOOK_API AEC_Recipe : public AActor
+class ELDENCOOK_API AEC_Recipe : public AInfo
 {
 	GENERATED_BODY()
 	
@@ -40,13 +38,9 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, Category="AEC_Recipe|Status", ReplicatedUsing=OnRep_Ingredients, BlueprintReadOnly)
 	TArray<FIngredient> Ingredients;
-
-protected:
+	
 	UPROPERTY()
 	AEC_RecipeSpawner* MyRecipeSpawner;
-
-public:
-	FOnRecipeSpawned OnRecipeSpawnedDelegate;
 	
 public:
 	TArray<FIngredient> GetIngredients() const;
