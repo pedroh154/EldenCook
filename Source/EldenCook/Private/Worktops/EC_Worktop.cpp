@@ -192,6 +192,8 @@ void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 		LocalLastItem->SetActorHiddenInGame(false);
 		DetachCurrentItem();
 	}
+
+	
 }
 
 void AEC_Worktop::AttachItem(AEC_Item* ItemToAttach, FName Socket)

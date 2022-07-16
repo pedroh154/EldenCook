@@ -5,7 +5,6 @@
 #include "Recipes/EC_DeliverManager.h"
 #include "Recipes/EC_Recipe.h"
 
-
 AEC_RecipeSpawner::AEC_RecipeSpawner()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -18,8 +17,10 @@ AEC_RecipeSpawner::AEC_RecipeSpawner()
 	}
 
 	NewRecipeCooldown = 2.0f;
-
+	
 	SetActorEnableCollision(false);
+
+	bReplicates = true;
 }
 
 void AEC_RecipeSpawner::Tick(float DeltaTime)
@@ -45,8 +46,9 @@ void AEC_RecipeSpawner::BeginPlay()
 		{
 			FActorSpawnParameters SpawnParameters;
 			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			DeliverManager = GetWorld()->SpawnActor<AEC_DeliverManager>(DeliverManagerClass, SpawnParameters);
+			DeliverManager = GetWorld()->SpawnActorDeferred<AEC_DeliverManager>(DeliverManagerClass, FTransform::Identity);
 			DeliverManager->Init(this);
+			UGameplayStatics::FinishSpawningActor(DeliverManager, FTransform::Identity);
 
 			if(DeliverManager)
 			{
@@ -70,7 +72,7 @@ void AEC_RecipeSpawner::SpawnNewRecipe()
 	if(Recipe)
 	{
 		//init recipe with random ingredients based on this spawner's settings
-		Recipe->Init(GetIngredientsForRecipe());
+		Recipe->Init(GetIngredientsForRecipe(), this);
 
 		//get ingredients of spawned recipe
 		const TArray<FIngredient> RecipeIngredients = Recipe->GetIngredients();

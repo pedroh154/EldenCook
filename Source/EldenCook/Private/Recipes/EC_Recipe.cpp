@@ -1,9 +1,7 @@
 #include "Recipes/EC_Recipe.h"
 #include "Items/EC_SerializableIngredient.h"
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
-#include "Player/EC_HUD.h"
-#include "Player/EldenCookPlayerController.h"
+#include "Recipes/EC_RecipeSpawner.h"
 
 AEC_Recipe::AEC_Recipe()
 {
@@ -15,6 +13,16 @@ AEC_Recipe::AEC_Recipe()
 void AEC_Recipe::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	// if(!MyRecipeSpawner)
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red,
+	// 		FString::Printf(TEXT("%s 's RecipeSpawner is null! It depends on it to work, make sure to call Init() destroying!"), *GetNameSafe(this)));
+	// 	
+	// 	Destroy();
+	// }
+	
+	OnRecipeSpawnedDelegate.Broadcast(this);
 }
 
 void AEC_Recipe::Tick(float DeltaTime)
@@ -28,14 +36,10 @@ void AEC_Recipe::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AEC_Recipe, Ingredients)
 }
 
-void AEC_Recipe::Init(const TArray<FIngredient> NIngredients)
+void AEC_Recipe::Init(const TArray<FIngredient> NIngredients, AEC_RecipeSpawner* RecipeSpawner)
 {
 	Ingredients = NIngredients;
-
-	if(GetNetMode() == NM_ListenServer)
-	{
-		NotifyHUD();
-	}
+	MyRecipeSpawner = RecipeSpawner;
 }
 
 void AEC_Recipe::Deliver()
@@ -45,20 +49,6 @@ void AEC_Recipe::Deliver()
 
 void AEC_Recipe::OnRep_Ingredients()
 {
-	NotifyHUD();
-}
-
-void AEC_Recipe::NotifyHUD()
-{
-	for(FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
-	{
-		AEldenCookPlayerController* PlayerController = Cast<AEldenCookPlayerController>(*Iterator);
-
-		if(PlayerController->IsLocalController())
-		{
-			PlayerController->GetEc_HUD()->BP_OnNewRecipe(this);
-		}
-	}
 }
 
 TArray<FIngredient> AEC_Recipe::GetIngredients() const

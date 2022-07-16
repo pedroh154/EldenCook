@@ -33,16 +33,14 @@ void AEC_Boss::OnComponentBeginOverlap(
 	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	//if(GetLocalRole() < ROLE_Authority)
-	//{
-		if(AEldenCookCharacter* Char = Cast<AEldenCookCharacter>(OtherActor))
+
+	if(AEldenCookCharacter* Char = Cast<AEldenCookCharacter>(OtherActor))
+	{
+		if(Char->IsLocallyControlled())
 		{
-			if(Char->IsLocallyControlled())
-			{
-				MyRecipeSpawner->GetDeliverManager()->DeliverPlate(Cast<AEC_Plate>(Char->GetCurrentItem()));
-			}
+			MyRecipeSpawner->GetDeliverManager()->DeliverPlate(Cast<AEC_Plate>(Char->GetCurrentItem()));
 		}
-	//}
+	}
 }
 
 // Called every frame

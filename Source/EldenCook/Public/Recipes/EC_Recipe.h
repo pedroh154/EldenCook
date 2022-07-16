@@ -1,20 +1,22 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
-
 #include "CoreMinimal.h"
-#include "Items/EC_SerializableIngredient.h"
 #include "GameFramework/Actor.h"
+#include "Items/EC_SerializableIngredient.h"
 #include "EC_Recipe.generated.h"
+
+class AEC_Recipe;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRecipeSpawned, AEC_Recipe*, SpawnedRecipe);
 
 class AEC_SerializableIngredient;
 struct FIngredient;
+class AEC_RecipeSpawner;
 
 /* A recipe that can only be instantiated by a RecipeSpawner.
  * Has an TArray of FIngredients (Ingredients table row struct).
  * Is replicated to clients.
  */
-UCLASS(NotBlueprintable)
+UCLASS(NotBlueprintable, NotPlaceable)
 class ELDENCOOK_API AEC_Recipe : public AActor
 {
 	GENERATED_BODY()
@@ -28,12 +30,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void Init(TArray<FIngredient> NIngredients);
+	virtual void Init(TArray<FIngredient> NIngredients, AEC_RecipeSpawner* RecipeSpawner);
 
 	virtual void Deliver();
-
-	UFUNCTION()
-	void NotifyHUD();
 
 	UFUNCTION()
 	virtual void OnRep_Ingredients();
@@ -41,6 +40,13 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, Category="AEC_Recipe|Status", ReplicatedUsing=OnRep_Ingredients, BlueprintReadOnly)
 	TArray<FIngredient> Ingredients;
+
+protected:
+	UPROPERTY()
+	AEC_RecipeSpawner* MyRecipeSpawner;
+
+public:
+	FOnRecipeSpawned OnRecipeSpawnedDelegate;
 	
 public:
 	TArray<FIngredient> GetIngredients() const;

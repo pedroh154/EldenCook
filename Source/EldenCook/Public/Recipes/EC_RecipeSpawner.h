@@ -1,5 +1,4 @@
 #pragma once
-
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "GameFramework/Actor.h"
@@ -47,7 +46,10 @@ enum EIngredientTypes;
 class AEC_Recipe;
 
 /* A class that instantiates EC_Recipes depending on the rules set on SpawnRules.
- * Only exists on the server, but spawned EC_Recipes are replicated back to clients */
+ * Only exists on the server, but spawned EC_Recipes are replicated back to clients.
+ * Also spawns an EC_DeliverManager that will handle the deliver process for recipes spawned
+ * by this spawner.
+ */
 UCLASS(Abstract, Blueprintable)
 class ELDENCOOK_API AEC_RecipeSpawner : public AActor
 {
@@ -68,18 +70,20 @@ public:
 	//gets ingredients for recipe according to SpawnRules
 	virtual TArray<FIngredient> GetIngredientsForRecipe();
 
+public:
+	TMultiMap<FString, AEC_Recipe*> GetSpawnedRecipes();
+	AEC_DeliverManager* GetDeliverManager() const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="AEC_RecipeSpawner|Settings")
 	TSubclassOf<AEC_DeliverManager> DeliverManagerClass;
 
 	UPROPERTY(EditDefaultsOnly, Category="AEC_RecipeSpawner|Status")
 	AEC_DeliverManager* DeliverManager;
-
-protected:
+	
 	UPROPERTY()
 	UDataTable* DataTable;
-
-	//TMultiMap is a TMap that allows duplicate keys
+	
 	TMultiMap<FString, AEC_Recipe*> SpawnedRecipes;
 	
 	UPROPERTY(EditAnywhere, Category="AEC_RecipeSpawner|Settings")
@@ -87,9 +91,5 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="AEC_RecipeSpawner|Settings")
 	float NewRecipeCooldown;
-
-public:
-	TMultiMap<FString, AEC_Recipe*> GetSpawnedRecipes();
-	AEC_DeliverManager* GetDeliverManager() const;
 	
 };

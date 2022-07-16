@@ -65,7 +65,7 @@ void AEC_ItemSpawner::SpawnItem()
 
 				//play spawn fx if listen server; will also play on client on OnRep_CurrentSpawnedItem
 				if(GetNetMode() != NM_DedicatedServer) PlaySpawnFX();
-
+				
 				ApplyCustomCurrentItemSettings();
 			}
 		}
@@ -174,12 +174,11 @@ void AEC_ItemSpawner::ApplyCustomCurrentItemSettings()
 		if(CustomConfig.CustomItemSize != FVector::ZeroVector)
 		{
 			if(IsValid(CustomCurrentItemMeshComp)) CustomCurrentItemMeshComp->SetWorldScale3D(CustomConfig.CustomItemSize);
-			CurrentItem->SetActorScale3D(CustomConfig.CustomItemSize);
+			CurrentItem->SetActorRelativeScale3D(CustomConfig.CustomItemSize);
 		}
 		else
 		{
-			CurrentItem->SetActorScale3D(FVector(1.0f, 1.0f, 1.0f));
-			//CurrentItem->SetActorRelativeLocation(FVector::ZeroVector);
+			CurrentItem->SetActorRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
 			if(IsValid(CustomCurrentItemMeshComp)) CustomCurrentItemMeshComp->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
 		}
 	}
@@ -192,4 +191,9 @@ void AEC_ItemSpawner::ApplyCustomCurrentItemSettings()
 void AEC_ItemSpawner::OnRep_CurrentItem(AEC_Item* Last)
 {
 	Super::OnRep_CurrentItem(Last);
+
+	//for some reason, when setting a custom scale for CurrentItem on server using ApplyCustomCurrentItemSettings
+	//it will change the relative scale to a random vector, so this is a workout to reset it.
+	if(CurrentItem)
+		CurrentItem->SetActorRelativeLocation(FVector::ZeroVector);
 }
