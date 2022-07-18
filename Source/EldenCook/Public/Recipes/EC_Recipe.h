@@ -5,12 +5,11 @@
 #include "EC_Recipe.generated.h"
 
 class AEC_Recipe;
-
 class AEC_SerializableIngredient;
 struct FIngredient;
 class AEC_RecipeSpawner;
 
-/* A recipe that can only be instantiated by a RecipeSpawner.
+/* A recipe that can only be instantiated by a MyRecipeSpawner.
  * Has an TArray of FIngredients (Ingredients table row struct).
  * Is replicated to clients.
  */
@@ -44,7 +43,6 @@ protected:
 	
 public:
 	TArray<FIngredient> GetIngredients() const;
-	FString GetRecipeKey();
 };
 
 

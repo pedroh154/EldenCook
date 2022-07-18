@@ -26,7 +26,7 @@ AEC_Worktop::AEC_Worktop()
 
 	ItemSpawnSocketName = TEXT("SOCKET_ItemSpawn");
 	
-	bRunConstructionScriptOnDrag = 0;
+	//bRunConstructionScriptOnDrag = false;
 }
 
 void AEC_Worktop::BeginPlay()
@@ -139,7 +139,7 @@ void AEC_Worktop::SetInteractingMaterial()
     if(IsValid(MaterialWhileInteracting) && IsValid(CurrMesh))
 	{
 		PreviousMaterial = CurrMesh->GetMaterial(0);
-		MeshComponent->GetStaticMesh()->SetMaterial(0, MaterialWhileInteracting);
+//		MeshComponent->GetStaticMesh()->SetMaterial(0, MaterialWhileInteracting);
 	}
 }
 
@@ -219,7 +219,7 @@ void AEC_Worktop::RemoveInteractingMaterial()
 	
 	if(IsValid(CurrMesh))
 	{
-		CurrMesh->SetMaterial(0, PreviousMaterial);
+	//	CurrMesh->SetMaterial(0, PreviousMaterial);
 	}
 }
 

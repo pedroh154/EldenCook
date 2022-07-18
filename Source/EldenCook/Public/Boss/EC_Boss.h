@@ -8,7 +8,7 @@
 #include "EC_Boss.generated.h"
 
 class AEC_RecipeSpawner;
-class AEC_DeliverManager;
+class AEC_RecipeSpawnerDeliverManager;
 UCLASS()
 class ELDENCOOK_API AEC_Boss : public ACharacter
 {

@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
-#include "EC_DeliverManager.generated.h"
+#include "EC_RecipeSpawnerDeliverManager.generated.h"
 
 class AEC_RecipeSpawner;
 class AEC_Plate;
@@ -13,12 +13,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRecipeDelivered, AEC_Recipe*, De
 
 /* Exists on client and server, responsible for delivering done recipes */
 UCLASS(NotBlueprintable, NotPlaceable)
-class ELDENCOOK_API AEC_DeliverManager : public AInfo
+class ELDENCOOK_API AEC_RecipeSpawnerDeliverManager : public AInfo
 {
 	GENERATED_BODY()
 
 public:	
-	AEC_DeliverManager();
+	AEC_RecipeSpawnerDeliverManager();
 
 protected:
 	virtual void BeginPlay() override;
@@ -26,16 +26,19 @@ protected:
 public:
 	virtual void Init(AEC_RecipeSpawner* MyRecipeSpawner);
 
+/* DELIVER PLATE START */
 	virtual void OnDeliverPlate(AEC_Plate* Plate);
 	AEC_Recipe* AnalyzePlate(const AEC_Plate* Plate) const;
 	virtual void DeliverPlate(AEC_Plate* Plate);
-	
+
+private:
 	UFUNCTION(Server, Reliable)
 	virtual void Server_DeliverPlate(AEC_Plate* Plate);
-
+/* DELIVER PLATE END */
+	
 protected:
-	UPROPERTY(VisibleAnywhere, Category="AEC_DeliverManager|Status")
-	AEC_RecipeSpawner* RecipeSpawner;
+	UPROPERTY(VisibleAnywhere, Category="AEC_RecipeSpawnerDeliverManager|Status")
+	AEC_RecipeSpawner* MyRecipeSpawner;
 
 public:
 	FOnRecipeDelivered OnRecipeDeliveredDelegate;

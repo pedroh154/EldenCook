@@ -7,7 +7,7 @@
 
 class AEC_Recipe;
 enum EIngredientTypes;
-class AEC_DeliverManager;
+class AEC_RecipeSpawnerDeliverManager;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRecipeSpawned, AEC_Recipe*, SpawnedRecipe);
 
@@ -50,7 +50,7 @@ class AEC_Recipe;
 /* A class that instantiates EC_Recipes depending on the rules set on SpawnRules.
  * Only exists on the server, but spawned EC_Recipes are replicated back to clients.
  * Also spawns an EC_DeliverManager that will handle the deliver process for recipes spawned
- * by this spawner.
+ * by this.
  */
 UCLASS(Abstract, Blueprintable)
 class ELDENCOOK_API AEC_RecipeSpawner : public AInfo
@@ -73,26 +73,23 @@ public:
 	virtual TArray<FIngredient> GetIngredientsForRecipe();
 
 public:
-	TMultiMap<FString, AEC_Recipe*> GetSpawnedRecipes();
-	AEC_DeliverManager* GetDeliverManager() const;
+	TArray<AEC_Recipe*> GetSpawnedRecipes();
+	AEC_RecipeSpawnerDeliverManager* GetDeliverManager() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="AEC_RecipeSpawner|Settings")
-	TSubclassOf<AEC_DeliverManager> DeliverManagerClass;
-
 	UPROPERTY(EditDefaultsOnly, Category="AEC_RecipeSpawner|Status")
-	AEC_DeliverManager* DeliverManager;
+	AEC_RecipeSpawnerDeliverManager* DeliverManager;
 	
 	UPROPERTY()
-	UDataTable* DataTable;
+	UDataTable* IngredientsDataTable;
 	
-	TMultiMap<FString, AEC_Recipe*> SpawnedRecipes;
+	TArray<AEC_Recipe*> SpawnedRecipes;
 	
 	UPROPERTY(EditAnywhere, Category="AEC_RecipeSpawner|Settings")
 	FRecipeSpawnRules SpawnRules;
 
 	UPROPERTY(EditAnywhere, Category="AEC_RecipeSpawner|Settings")
-	float NewRecipeCooldown;
+	float RecipeSpawnCooldown;
 
 public:
 	UPROPERTY(BlueprintReadOnly, BlueprintAssignable)

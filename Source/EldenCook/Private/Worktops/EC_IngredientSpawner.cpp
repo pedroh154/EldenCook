@@ -8,7 +8,7 @@
 AEC_IngredientSpawner::AEC_IngredientSpawner()
 {
 	//default value for data table:
-	static ConstructorHelpers::FObjectFinder<UDataTable> IngredientsTableFinder(TEXT("DataTable'/Game/Ingredients/IngredientsTable.IngredientsTable'"));
+	static ConstructorHelpers::FObjectFinder<UDataTable> IngredientsTableFinder(TEXT("DataTable'/Game/Ingredients/DT_IngredientsTable.DT_IngredientsTable'"));
 	
 	if(IngredientsTableFinder.Succeeded())
 	{

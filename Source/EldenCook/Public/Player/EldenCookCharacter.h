@@ -72,7 +72,7 @@ private:
 public:
 	UFUNCTION()
 	virtual void OnLineTraceHighlight(AActor* Hit, AActor* Last);
-
+	
 	virtual void DrawDebugVars();
 
 	/* REP NOTIFIERS -------------------------------------------------------------------------------------------------------------------------- START */

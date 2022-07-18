@@ -48,20 +48,7 @@ void AEC_Plate::OnInteractAnotherInteractable(IEC_InteractableInterface* Interac
 	{
 		if(CanAddItem(Item))
 		{
-			if(MyPlayer)
-			{
-				if(Item->GetMyWorktop())
-				{
-					Item->GetMyWorktop()->SetWorktopItem(nullptr);
-				}
-				
-				AddItem(Item);
-			}
-			else if(MyWorktop)
-			{
-				Item->GetMyPlayer()->DropItem();
-				AddItem(Item);
-			}
+			AddItem(Item);
 		}
 	}
 }
@@ -70,9 +57,21 @@ bool AEC_Plate::AddItem(AEC_Item* Item, const bool bFromRep)
 {
 	if(CanAddItem(Item))
 	{
-		if(!bFromRep) Items.Add(Item);
+		if(AEldenCookCharacter* Char = Item->GetOwner<AEldenCookCharacter>())
+		{
+			Char->DropItem();
+		}
+		else if(AEC_Worktop* Worktop = Item->GetOwner<AEC_Worktop>())
+		{
+			Worktop->SetWorktopItem(nullptr);
+		}
+		
+		if(!bFromRep)
+			Items.Add(Item);
+		
 		AttachItem(Item);
 		Item->OnEnterPlate(this);
+		
 		return true;
 	}
 

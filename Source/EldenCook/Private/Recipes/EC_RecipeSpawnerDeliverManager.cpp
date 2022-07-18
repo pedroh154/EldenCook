@@ -1,40 +1,40 @@
-#include "Recipes/EC_DeliverManager.h"
+#include "Recipes/EC_RecipeSpawnerDeliverManager.h"
 #include "Items/EC_Plate.h"
 #include "Recipes/EC_Recipe.h"
 #include "Recipes/EC_RecipeSpawner.h"
 #include "Player/EldenCookCharacter.h"
 
-AEC_DeliverManager::AEC_DeliverManager()
+AEC_RecipeSpawnerDeliverManager::AEC_RecipeSpawnerDeliverManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorEnableCollision(false);
 }
 
-void AEC_DeliverManager::BeginPlay()
+void AEC_RecipeSpawnerDeliverManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(!RecipeSpawner)
+	if(!MyRecipeSpawner)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red,
-			FString::Printf(TEXT("%s 's RecipeSpawner is null! It depends on it to work! Set it using Init()!"),*GetNameSafe(this)) );
+			FString::Printf(TEXT("%s 's MyRecipeSpawner is null! It depends on it to work! Set it using Init()!"),*GetNameSafe(this)) );
 	}
 }
 
-void AEC_DeliverManager::Init(AEC_RecipeSpawner* MyRecipeSpawner)
+void AEC_RecipeSpawnerDeliverManager::Init(AEC_RecipeSpawner* RecipeSpawner)
 {
-	RecipeSpawner = MyRecipeSpawner;
+	MyRecipeSpawner = RecipeSpawner;
 }
 
-AEC_Recipe* AEC_DeliverManager::AnalyzePlate(const AEC_Plate* Plate) const
+AEC_Recipe* AEC_RecipeSpawnerDeliverManager::AnalyzePlate(const AEC_Plate* Plate) const
 {
-	if(IsValid(Plate) && IsValid(RecipeSpawner))
+	if(IsValid(Plate) && IsValid(MyRecipeSpawner))
 	{
 		//get all items on plate.
 		TArray<AEC_Item*> PlateItems = Plate->GetItems();
 
 		//get all current spawned recipes
-		const TMultiMap<FString, AEC_Recipe*> SpawnedRecipes = RecipeSpawner->GetSpawnedRecipes();
+		const TArray<AEC_Recipe*> SpawnedRecipes = MyRecipeSpawner->GetSpawnedRecipes();
 	
 		if(PlateItems.Num() > 0 && SpawnedRecipes.Num() > 0)
 		{
@@ -42,7 +42,7 @@ AEC_Recipe* AEC_DeliverManager::AnalyzePlate(const AEC_Plate* Plate) const
 			for (auto& CurrentRecipe : SpawnedRecipes)
 			{
 				//get CurrentRecipe ingredients
-				TArray<FIngredient> CurrentRecipeIngredients = CurrentRecipe.Value->GetIngredients();
+				TArray<FIngredient> CurrentRecipeIngredients = CurrentRecipe->GetIngredients();
 			
 				//for each item inside plate
 				for(auto& Item : PlateItems)
@@ -73,12 +73,12 @@ AEC_Recipe* AEC_DeliverManager::AnalyzePlate(const AEC_Plate* Plate) const
 						}
 						else
 						{
-							UE_LOG(LogTemp, Fatal, TEXT("AEC_DeliverManager::AnalyzePlate: IngredientRow was null!"))
+							UE_LOG(LogTemp, Fatal, TEXT("AEC_RecipeSpawnerDeliverManager::AnalyzePlate: IngredientRow was null!"))
 						}
 						
 						if(CurrentRecipeIngredients.Num() == 0)
 						{
-							return CurrentRecipe.Value;
+							return CurrentRecipe;
 						}
 					}
 				}
@@ -89,7 +89,7 @@ AEC_Recipe* AEC_DeliverManager::AnalyzePlate(const AEC_Plate* Plate) const
 	return nullptr;
 }
 
-void AEC_DeliverManager::OnDeliverPlate(AEC_Plate* Plate)
+void AEC_RecipeSpawnerDeliverManager::OnDeliverPlate(AEC_Plate* Plate)
 {
 	//analyze plate client side to make sure we can deliver it
 	//so not to waste an rpc
@@ -106,16 +106,16 @@ void AEC_DeliverManager::OnDeliverPlate(AEC_Plate* Plate)
 	}
 }
 
-void AEC_DeliverManager::Server_DeliverPlate_Implementation(AEC_Plate* Plate)
+void AEC_RecipeSpawnerDeliverManager::Server_DeliverPlate_Implementation(AEC_Plate* Plate)
 {
 	DeliverPlate(Plate);
 }
 
-void AEC_DeliverManager::DeliverPlate(AEC_Plate* Plate)
+void AEC_RecipeSpawnerDeliverManager::DeliverPlate(AEC_Plate* Plate)
 {
 	if(AEC_Recipe* Recipe = AnalyzePlate(Plate))
 	{
-		OnRecipeDeliveredDelegate.Broadcast(Recipe, Plate->GetMyPlayer());
+		OnRecipeDeliveredDelegate.Broadcast(Recipe, Cast<AEldenCookCharacter>(Plate->GetOwner()));
 		Recipe->Deliver();
 	}
 }

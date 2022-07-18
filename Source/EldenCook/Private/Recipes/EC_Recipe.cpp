@@ -38,8 +38,6 @@ void AEC_Recipe::Init(const TArray<FIngredient> NIngredients, AEC_RecipeSpawner*
 {
 	Ingredients = NIngredients;
 	MyRecipeSpawner = RecipeSpawner;
-
-	
 }
 
 void AEC_Recipe::Deliver()
@@ -55,18 +53,4 @@ TArray<FIngredient> AEC_Recipe::GetIngredients() const
 {
 	return Ingredients;
 }
-
-FString AEC_Recipe::GetRecipeKey()
-{
-	FString Key = FString(TEXT(""));
-	
-	//add the recipe to the spawned recipes to the map, forming its key using its ingredients:
-	for(int32 i = 0; i < Ingredients.Num(); ++i)
-	{
-		Key = Key.Append(Ingredients[i].UniqueID.ToString());
-	}
-
-	return Key;
-}
-
 

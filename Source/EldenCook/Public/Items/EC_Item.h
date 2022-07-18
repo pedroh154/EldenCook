@@ -27,6 +27,7 @@ public:
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
 	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
+	virtual void OnInteractAnotherInteractable(IEC_InteractableInterface* Interactable) override;
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
 	
 	/* EVENTS -------------------------------------------------------------------------------------------------------------------------- START */
@@ -36,6 +37,7 @@ public:
 	virtual void OnEnterWorktop(AEC_Worktop* Worktop);
 	virtual void OnLeaveWorktop();
 	virtual void OnEnterPlate(AEC_Plate* Plate); //item can only enter plate
+	virtual void OnLeavePlate();
 	/* EVENTS -------------------------------------------------------------------------------------------------------------------------- START */
 
 	virtual void DrawDebugVars();
@@ -44,16 +46,9 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category="AEC_Item|Components")
 	UStaticMeshComponent* MeshComponent;
 	
-	UPROPERTY(VisibleAnywhere, Category="AEC_Item|Status")
-	AEldenCookCharacter* MyPlayer;
-	
-	UPROPERTY(VisibleAnywhere, Category="AEC_Item|Status")
-	AEC_Worktop* MyWorktop;
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AEC_Item|Settings")
 	bool bDrawDebugVars;
 	
 	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }
-	FORCEINLINE class AEldenCookCharacter* GetMyPlayer() const { return MyPlayer; }
-	FORCEINLINE class AEC_Worktop* GetMyWorktop() const { return MyWorktop; }
 };

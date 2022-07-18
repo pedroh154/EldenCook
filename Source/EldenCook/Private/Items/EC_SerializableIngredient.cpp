@@ -1,7 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "EldenCook/Public/Items/EC_SerializableIngredient.h"
+#include "Engine/AssetManager.h"
 
 AEC_SerializableIngredient::AEC_SerializableIngredient()
 {
@@ -22,28 +20,46 @@ void AEC_SerializableIngredient::Init(const FDataTableRowHandle DataTableRow)
 
 	if(IngredientRow.DataTable)
 	{
-		const FIngredient* RowStruct = DataTableRow.GetRow<FIngredient>(TEXT(""));
+		const FIngredient* Row = IngredientRow.GetRow<FIngredient>(TEXT(""));
 
-		if(RowStruct)
+		if(Row)
 		{
-			HUDIcon = RowStruct->HUDIcon;
-			Type = RowStruct->Type;
-			LazyLoad();
+			if(UAssetManager* Manager = UAssetManager::GetIfValid())
+			{
+				const FStreamableDelegate LoadedDelegate = FStreamableDelegate::CreateUObject(this, &AEC_SerializableIngredient::OnPrimaryAssetLoaded, Row->DataAsset);
+				const TArray<FName> Bundles;
+				Manager->LoadPrimaryAsset(Row->DataAsset, Bundles, LoadedDelegate);
+			}
+			
+			Type = Row->Type;
+			HUDIcon = Row->HUDIcon;
 		}
 	}
 }
 
-void AEC_SerializableIngredient::LazyLoad()
+void AEC_SerializableIngredient::OnPrimaryAssetLoaded(const FPrimaryAssetId LoadedAssetId)
 {
-	const FIngredient* RowStruct = IngredientRow.GetRow<FIngredient>(TEXT(""));
-
-	if(RowStruct->Mesh.IsPending())
+	if (const UAssetManager* Manager = UAssetManager::GetIfValid())
 	{
-		MeshComponent->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, *RowStruct->Mesh.ToSoftObjectPath().ToString()));
-	}
+		const UEC_IngredientDataAsset* Data = Cast<UEC_IngredientDataAsset>(Manager->GetPrimaryAssetObject(LoadedAssetId));
+
+		if(Data)
+		{
+			MeshComponent->SetStaticMesh(Data->Mesh);
+		}
+
+	};
 }
 
 FDataTableRowHandle AEC_SerializableIngredient::GetIngredientRow() const
 {
 	return IngredientRow;
+}
+
+void AEC_SerializableIngredient::LazyLoad()
+{
+	// if(RowStruct->Mesh.IsPending())
+	// {
+	// 	MeshComponent->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, *RowStruct->Mesh.ToSoftObjectPath().ToString()));
+	// }
 }

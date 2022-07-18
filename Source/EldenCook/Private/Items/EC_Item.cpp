@@ -56,6 +56,11 @@ void AEC_Item::OnInteract(AEldenCookCharacter* InteractingChar)
 	}
 }
 
+void AEC_Item::OnInteractAnotherInteractable(IEC_InteractableInterface* Interactable)
+{
+	IEC_InteractableInterface::OnInteractAnotherInteractable(Interactable);
+}
+
 bool AEC_Item::CanInteract(AEldenCookCharacter* InteractingChar)
 {
 	return true;
@@ -66,20 +71,16 @@ bool AEC_Item::CanInteract(AEldenCookCharacter* InteractingChar)
 void AEC_Item::OnEquip(AEldenCookCharacter* Char)
 {
 	SetOwner(Char);
-	MyPlayer = Char;
-	MyWorktop = nullptr;
 	SetActorEnableCollision(false);
 	SetCurrentlyInteractable(false, this);
-	UE_LOG(LogTemp, Display, TEXT("AEC_Item::OnEquip: equipped %s on %s"), *GetNameSafe(this), *GetNameSafe(MyPlayer))
+	UE_LOG(LogTemp, Display, TEXT("AEC_Item::OnEquip: equipped %s on %s"), *GetNameSafe(this), *GetNameSafe(Char))
 }
 
 bool AEC_Item::OnUnequip(AEC_Item* NewItem)
 {
-	UE_LOG(LogTemp, Display, TEXT("AEC_Item::OnUnequip: unequipped %s from %s"), *GetNameSafe(this), *GetNameSafe(MyPlayer))
+	UE_LOG(LogTemp, Display, TEXT("AEC_Item::OnUnequip: unequipped %s from %s"), *GetNameSafe(this), *GetNameSafe(Owner))
 	SetActorEnableCollision(true);
 	SetOwner(nullptr);
-	MyPlayer = nullptr;
-	MyWorktop = nullptr;
 	SetCurrentlyInteractable(true, this);
 	return true;
 }
@@ -92,38 +93,43 @@ void AEC_Item::OnEnterWorktop(AEC_Worktop* Worktop)
 		UE_LOG(LogTemp, Display, TEXT("CL - AEC_Item::OnEnterWorktop: %s entering %s"), *GetNameSafe(this), *GetNameSafe(Worktop))
 	
 	SetOwner(Worktop);
-	MyWorktop = Worktop;
+	SetActorEnableCollision(false);
 	SetCurrentlyInteractable(false, this);
 }
 
 void AEC_Item::OnLeaveWorktop()
 {
 	if(GetLocalRole() == ROLE_Authority)
-		UE_LOG(LogTemp, Display, TEXT("SV - AEC_Item::OnLeaveWorktop: %s leaving %s"), *GetNameSafe(this), *GetNameSafe(MyWorktop))
+		UE_LOG(LogTemp, Display, TEXT("SV - AEC_Item::OnLeaveWorktop: %s leaving %s"), *GetNameSafe(this), *GetNameSafe(Owner))
 	else
-		UE_LOG(LogTemp, Display, TEXT("CL - AEC_Item::OnLeaveWorktop: %s leaving %s"), *GetNameSafe(this), *GetNameSafe(MyWorktop));
+		UE_LOG(LogTemp, Display, TEXT("CL - AEC_Item::OnLeaveWorktop: %s leaving %s"), *GetNameSafe(this), *GetNameSafe(Owner));
 	
 	SetOwner(nullptr);
-	MyWorktop = nullptr;
 	SetCurrentlyInteractable(true, this);
 }
 
 void AEC_Item::OnEnterPlate(AEC_Plate* Plate)
 {
 	SetOwner(Plate);
-	MyPlayer = Plate->MyPlayer;
 	SetActorEnableCollision(false);
 	SetCurrentlyInteractable(false, this);
+}
+
+void AEC_Item::OnLeavePlate()
+{
+	SetOwner(nullptr);
+	SetActorEnableCollision(true);
+	SetCurrentlyInteractable(true, this);
 }
 
 void AEC_Item::DrawDebugVars()
 {
 	const FVector ActorLoc = GetActorLocation();
 	
-	DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -0), FString::Printf(TEXT("MyPlayer: %s"), *GetNameSafe(MyPlayer)), nullptr,
+	DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -0), FString::Printf(TEXT("Owner: %s"), *GetNameSafe(Owner)), nullptr,
 		FColor::Green, GetWorld()->GetDeltaSeconds(), true, 1);
 	
-	DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -50.0f), FString::Printf(TEXT("MyWorktop: %s"), *GetNameSafe(MyWorktop)), nullptr,
+	DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -50.0f), FString::Printf(TEXT("MyWorktop: %s"), *GetNameSafe(Owner)), nullptr,
 		FColor::Blue, GetWorld()->GetDeltaSeconds(), true, 1);
 }
 

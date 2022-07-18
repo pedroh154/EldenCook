@@ -2,21 +2,21 @@
 #include "Items/EC_SerializableIngredient.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
-#include "Recipes/EC_DeliverManager.h"
+#include "Recipes/EC_RecipeSpawnerDeliverManager.h"
 #include "Recipes/EC_Recipe.h"
 
 AEC_RecipeSpawner::AEC_RecipeSpawner()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	static ConstructorHelpers::FObjectFinder<UDataTable> IngredientsTableFinder(TEXT("DataTable'/Game/Ingredients/IngredientsTable.IngredientsTable'"));
+	static ConstructorHelpers::FObjectFinder<UDataTable> IngredientsTableFinder(TEXT("DataTable'/Game/Ingredients/DT_IngredientsTable.DT_IngredientsTable'"));
 	
 	if(IngredientsTableFinder.Succeeded())
 	{
-		DataTable = IngredientsTableFinder.Object;
+		IngredientsDataTable = IngredientsTableFinder.Object;
 	}
 
-	NewRecipeCooldown = 2.0f;
+	RecipeSpawnCooldown = 2.0f;
 	
 	SetActorEnableCollision(false);
 
@@ -42,19 +42,16 @@ void AEC_RecipeSpawner::BeginPlay()
 	
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		if(ensureAlways(DeliverManagerClass))
-		{
-			FActorSpawnParameters SpawnParameters;
-			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			DeliverManager = GetWorld()->SpawnActorDeferred<AEC_DeliverManager>(DeliverManagerClass, FTransform::Identity);
-			DeliverManager->Init(this);
-			UGameplayStatics::FinishSpawningActor(DeliverManager, FTransform::Identity);
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		DeliverManager = GetWorld()->SpawnActorDeferred<AEC_RecipeSpawnerDeliverManager>(AEC_RecipeSpawnerDeliverManager::StaticClass(), FTransform::Identity);
+		DeliverManager->Init(this);
+		UGameplayStatics::FinishSpawningActor(DeliverManager, FTransform::Identity);
 
-			if(DeliverManager)
-			{
-				FTimerHandle TimerHandle;
-				GetWorldTimerManager().SetTimer(TimerHandle, this, &AEC_RecipeSpawner::SpawnNewRecipe, NewRecipeCooldown + 0.01f, true, 2.0f);
-			}
+		if(DeliverManager)
+		{
+			FTimerHandle TimerHandle;
+			GetWorldTimerManager().SetTimer(TimerHandle, this, &AEC_RecipeSpawner::SpawnNewRecipe, RecipeSpawnCooldown + 0.01f, true, 2.0f);
 		}
 	}
 	else
@@ -79,7 +76,7 @@ void AEC_RecipeSpawner::SpawnNewRecipe()
 
 		if(RecipeIngredients.Num() > 0)
 		{
-			SpawnedRecipes.Add(Recipe->GetRecipeKey(), Recipe);
+			SpawnedRecipes.Add(Recipe);
 			UGameplayStatics::FinishSpawningActor(Recipe, FTransform::Identity);
 
 			OnRecipeSpawnedDelegate.Broadcast(Recipe);
@@ -108,14 +105,14 @@ TArray<FIngredient> AEC_RecipeSpawner::GetIngredientsForRecipe()
 	TArray<FIngredient> ChosenIngredients;
 
 	//first, let's get all the possible ingredients from our ingredients table
-	if(DataTable)
+	if(IngredientsDataTable)
 	{
 		//according to SpawnRules, do we want only a specific type of ingredient for this recipe spawner?
 		if(SpawnRules.Filter != EIngredientTypes::None)
 		{
 			//get the ingredients of the type specified by SpawnRules
 			FDataTableCategoryHandle IngredientsTableHandler;
-			IngredientsTableHandler.DataTable = DataTable;
+			IngredientsTableHandler.DataTable = IngredientsDataTable;
 			IngredientsTableHandler.ColumnName = TEXT("Type");
 			IngredientsTableHandler.RowContents = UEnum::GetValueAsName<EIngredientTypes>(SpawnRules.Filter);
 			IngredientsTableHandler.GetRows<FIngredient>(PossibleIngredients, TEXT(""));
@@ -123,7 +120,7 @@ TArray<FIngredient> AEC_RecipeSpawner::GetIngredientsForRecipe()
 		else
 		{
 			//get all of the ingredients, independent of the type
-			DataTable->GetAllRows(TEXT(""), PossibleIngredients);
+			IngredientsDataTable->GetAllRows(TEXT(""), PossibleIngredients);
 		}
 
 		UE_LOG(LogTemp, Display, TEXT("AEC_RecipeSpawner::GetIngredientsForRecipe -> Num of possible ingredients: %d"), PossibleIngredients.Num());
@@ -217,12 +214,12 @@ TArray<FIngredient> AEC_RecipeSpawner::GetIngredientsForRecipe()
 	return ChosenIngredients;
 }
 
-AEC_DeliverManager* AEC_RecipeSpawner::GetDeliverManager() const
+AEC_RecipeSpawnerDeliverManager* AEC_RecipeSpawner::GetDeliverManager() const
 {
 	return DeliverManager;
 }
 
-TMultiMap<FString, AEC_Recipe*> AEC_RecipeSpawner::GetSpawnedRecipes()
+TArray<AEC_Recipe*> AEC_RecipeSpawner::GetSpawnedRecipes()
 {
 	return SpawnedRecipes;
 }
