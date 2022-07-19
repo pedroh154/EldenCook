@@ -128,9 +128,6 @@ void AEC_Item::DrawDebugVars()
 	
 	DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -0), FString::Printf(TEXT("Owner: %s"), *GetNameSafe(Owner)), nullptr,
 		FColor::Green, GetWorld()->GetDeltaSeconds(), true, 1);
-	
-	DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -50.0f), FString::Printf(TEXT("MyWorktop: %s"), *GetNameSafe(Owner)), nullptr,
-		FColor::Blue, GetWorld()->GetDeltaSeconds(), true, 1);
 }
 
 

@@ -83,7 +83,6 @@ void AEldenCookCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis(TEXT("Right"), this, &AEldenCookCharacter::InputRight);
 	PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &AEldenCookCharacter::InputInteract);
 	PlayerInputComponent->BindAction(TEXT("DropItem"), IE_Pressed, this, &AEldenCookCharacter::InputDropItem);
-	
 }
 
 void AEldenCookCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -132,13 +131,11 @@ void AEldenCookCharacter::InputRight(float Val)
 void AEldenCookCharacter::InputInteract()
 {
 	//when Interact button is pressed, check if we are hitting an interactable (we don't want to waste rpc calls)
-	IEC_InteractableInterface* Interactable = LineTraceInteractComponent->GetCurrentHitInteractable();
-
-	//if we are, proceed with interact
-	if(Interactable) Interact(Interactable);
+	if(IEC_InteractableInterface* Interactable = LineTraceInteractComponent->GetCurrentHitInteractable())
+		OnInteract(Interactable);
 }
 
-void AEldenCookCharacter::Interact(IEC_InteractableInterface* Interactable)
+void AEldenCookCharacter::OnInteract(IEC_InteractableInterface* Interactable)
 {
 	//if we are client, send rpc to server with the Interactable we are hitting client-side
 	if(GetLocalRole() < ROLE_Authority)
@@ -152,7 +149,7 @@ void AEldenCookCharacter::Interact(IEC_InteractableInterface* Interactable)
 	}
 }
 
-void AEldenCookCharacter::OnInteract(IEC_InteractableInterface* Interactable)
+void AEldenCookCharacter::Interact(IEC_InteractableInterface* Interactable)
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
@@ -167,7 +164,6 @@ void AEldenCookCharacter::OnInteract(IEC_InteractableInterface* Interactable)
 			Interactable->OnInteract(this);
 		}
 	}
-
 }
 
 void AEldenCookCharacter::Server_Interact_Implementation(AActor* Interactable)
@@ -272,10 +268,10 @@ void AEldenCookCharacter::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 void AEldenCookCharacter::InputDropItem()
 {
 	//check if we actually have an item equipped before sending rpc
-	if(CurrentItem) DropItem();
+	if(CurrentItem) OnDropItem();
 }
 
-void AEldenCookCharacter::DropItem()
+void AEldenCookCharacter::OnDropItem()
 {
 	//send rpc if client
 	if(GetLocalRole() < ROLE_Authority)
@@ -288,9 +284,15 @@ void AEldenCookCharacter::DropItem()
 	}
 }
 
+bool AEldenCookCharacter::DropItem()
+{
+	SetCurrentItem(nullptr, CurrentItem);
+	return true;
+}
+
 void AEldenCookCharacter::Server_DropItem_Implementation()
 {
-	OnDropItem();
+	DropItem();
 }
 
 bool AEldenCookCharacter::Server_DropItem_Validate()
@@ -298,10 +300,6 @@ bool AEldenCookCharacter::Server_DropItem_Validate()
 	return true;
 }
 
-void AEldenCookCharacter::OnDropItem()
-{
-	SetCurrentItem(nullptr, CurrentItem);
-}
 /* DROP ITEM ----------------------------------------- END */
 
 void AEldenCookCharacter::AttachItem(AEC_Item* ItemToAttach, const FName Socket)

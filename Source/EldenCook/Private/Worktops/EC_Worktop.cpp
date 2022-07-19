@@ -49,7 +49,6 @@ void AEC_Worktop::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 void AEC_Worktop::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	
 }
 
 /* INTERACT ----------------------------------------- START */
@@ -69,7 +68,7 @@ void AEC_Worktop::OnInteract(AEldenCookCharacter* InteractingChar)
 				{
 					//char puts the item here
 					InteractingChar->DropItem();
-					SetWorktopItem(CharItem);
+					EquipItem(CharItem);
 					
 					UE_LOG(LogTemp, Display, TEXT("SV - AEC_Worktop::OnInteract: %s putting item on %s"), *GetNameSafe(InteractingChar), *GetNameSafe(this));
 				}
@@ -98,7 +97,7 @@ void AEC_Worktop::OnInteract(AEldenCookCharacter* InteractingChar)
 					//give item to char
 					UE_LOG(LogTemp, Display, TEXT("SV - AEC_Worktop::OnInteract: %s taking item from %s"), *GetNameSafe(InteractingChar), *GetNameSafe(this));
 					AEC_Item* Helper = CurrentItem;
-					SetWorktopItem(nullptr);
+					EquipItem(nullptr);
 					InteractingChar->EquipItem(Helper); //try to add it to the character
 				}
 			}
@@ -144,9 +143,26 @@ void AEC_Worktop::SetInteractingMaterial()
 }
 
 /* ADD ITEM ----------------------------------------- START */
-void AEC_Worktop::SetWorktopItem(AEC_Item* Item)
+bool AEC_Worktop::EquipItem(AEC_Item* NewItem)
 {
-	SetCurrentItem(Item, CurrentItem);
+	if(CanEquipItem())
+	{
+		SetCurrentItem(NewItem, CurrentItem);
+		return true;
+	}
+	
+	return false;
+}
+
+bool AEC_Worktop::DropItem()
+{
+	SetCurrentItem(nullptr, CurrentItem);
+	return true;
+}
+
+bool AEC_Worktop::CanEquipItem() const
+{
+	return !CurrentItem;
 }
 
 /* ADD ITEM ----------------------------------------- END */
@@ -192,8 +208,6 @@ void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 		LocalLastItem->SetActorHiddenInGame(false);
 		DetachCurrentItem();
 	}
-
-	
 }
 
 void AEC_Worktop::AttachItem(AEC_Item* ItemToAttach, FName Socket)

@@ -2,12 +2,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/EC_InteractableInterface.h"
+#include "Interfaces/EC_ItemHolderInterface.h"
 #include "EldenCookCharacter.generated.h"
 
 class AEC_Item;
 
 UCLASS(Blueprintable)
-class AEldenCookCharacter : public ACharacter
+class AEldenCookCharacter : public ACharacter, public IEC_ItemHolderInterface
 {
 	GENERATED_BODY()
 
@@ -19,56 +20,50 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+	
 
-	/* MOVEMENT -------------------------------------------------------------------------------------------------------------------------- START */
+	/* INPUT EVENTS -------------------------------------------------------------------------------------------------------------------------- START */
 public:
 	virtual void InputForward(float Val);
 	virtual void InputRight(float Val);
-	/* MOVEMENT -------------------------------------------------------------------------------------------------------------------------- END */
 	
-	/* INTERACT -------------------------------------------------------------------------------------------------------------------------- START */
-public:
-	virtual void InputInteract();
-	virtual void Interact(IEC_InteractableInterface* Interactable);
-	virtual void OnInteract(IEC_InteractableInterface* Interactable);
-
-private:
-	//for some reason setting IEC_InteractableInterface type didn't work for RPC so we receive the actor and cast it
-	UFUNCTION(Server, Reliable)
-	virtual void Server_Interact(AActor* Interactable);
-	/* INTERACT -------------------------------------------------------------------------------------------------------------------------- END */
-
-	
-	/* EQUIP ITEM -------------------------------------------------------------------------------------------------------------------------- START */
-public:
-	virtual bool EquipItem(AEC_Item* Item);
-	bool CanEquipItem() const;
-	
-private:
-	UFUNCTION(Server, Reliable, WithValidation)
-	virtual void Server_EquipItem(AEC_Item* Item);
-	/* EQUIP ITEM -------------------------------------------------------------------------------------------------------------------------- END */
-
-private:
-	//used on Equip and Drop item
-	virtual void SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem = nullptr);
-
-	
-	/* DROP ITEM -------------------------------------------------------------------------------------------------------------------------- START */
 public:
 	virtual void InputDropItem();
-	virtual void DropItem();
 	virtual void OnDropItem();
+	
+public:
+	virtual void InputInteract();
+	virtual void OnInteract(IEC_InteractableInterface* Interactable);
+	/* INPUT EVENTS -------------------------------------------------------------------------------------------------------------------------- END */
 
+	
+	/* INTERACT -------------------------------------------------------------------------------------------------------------------------- START */
 private:
-	UFUNCTION(Server, Reliable, WithValidation)
-	virtual void Server_DropItem();
-	/* DROP ITEM -------------------------------------------------------------------------------------------------------------------------- END */
+	virtual void Interact(IEC_InteractableInterface* Interactable);
+	
+	UFUNCTION(Server, Reliable) //for some reason setting IEC_InteractableInterface type didn't work for RPC so we receive the actor and cast it
+	virtual void Server_Interact(AActor* Interactable);
+	/* INTERACT -------------------------------------------------------------------------------------------------------------------------- END */
+	
+	
+	/* ITEM HOLDER INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
+public:
+	virtual bool EquipItem(AEC_Item* Item) override;
+	virtual bool CanEquipItem() const override;
+	virtual bool DropItem() override;
+	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None) override;
+	virtual void DetachCurrentItem() override;
 	
 private:
-	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None);
-	virtual void DetachCurrentItem();
-
+	virtual void SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem = nullptr) override;
+	
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void Server_EquipItem(AEC_Item* Item);
+	
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void Server_DropItem();
+	/* ITEM HOLDER INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
+	
 public:
 	UFUNCTION()
 	virtual void OnLineTraceHighlight(AActor* Hit, AActor* Last);

@@ -26,11 +26,14 @@ void AEC_Plate::OnInteract(AEldenCookCharacter* InteractingChar)
 			//if it is, equip this and add item to this
 			if(AEC_Item* Item = InteractingChar->GetCurrentItem())
 			{
-				if(CanAddItem(Item))
+				if(CanEquipItem())
 				{
-					InteractingChar->DropItem();
-					AddItem(Item);
-					InteractingChar->EquipItem(this);
+					if(Item != this && !Item->IsA(StaticClass()))
+					{
+						InteractingChar->DropItem();
+						EquipItem(Item);
+						InteractingChar->EquipItem(this);
+					}
 				}
 			}
 			//if char has no items, just equip this
@@ -46,41 +49,47 @@ void AEC_Plate::OnInteractAnotherInteractable(IEC_InteractableInterface* Interac
 {
 	if(AEC_Item* Item = Cast<AEC_Item>(Interactable))
 	{
-		if(CanAddItem(Item))
+		if(IEC_ItemHolderInterface* Holder = Item->GetOwner<IEC_ItemHolderInterface>())
 		{
-			AddItem(Item);
+			Holder->DropItem();
 		}
+		
+		EquipItem(Item);
 	}
 }
 
-bool AEC_Plate::AddItem(AEC_Item* Item, const bool bFromRep)
+bool AEC_Plate::EquipItem(AEC_Item* ItemToEquip)
 {
-	if(CanAddItem(Item))
+	if(CanEquipItem())
 	{
-		if(AEldenCookCharacter* Char = Item->GetOwner<AEldenCookCharacter>())
-		{
-			Char->DropItem();
-		}
-		else if(AEC_Worktop* Worktop = Item->GetOwner<AEC_Worktop>())
-		{
-			Worktop->SetWorktopItem(nullptr);
-		}
-		
-		if(!bFromRep)
-			Items.Add(Item);
-		
-		AttachItem(Item);
-		Item->OnEnterPlate(this);
-		
+		AddItem(ItemToEquip);
 		return true;
 	}
-
+	
 	return false;
 }
 
-bool AEC_Plate::CanAddItem(AEC_Item* ItemToAdd)
+bool AEC_Plate::CanEquipItem() const
 {
-	return IsValid(ItemToAdd) && Items.Num() < Slots && ItemToAdd != this && !ItemToAdd->IsA(StaticClass());
+	return Items.Num() < Slots;
+}
+
+void AEC_Plate::AddItem(AEC_Item* Item, const bool bFromRep)
+{
+	if(!bFromRep)
+		Items.Add(Item);
+	
+	AttachItem(Item);
+	Item->OnEnterPlate(this);
+}
+
+void AEC_Plate::AttachItem(AEC_Item* ItemToAttach, FName Socket)
+{
+	if(ItemToAttach)
+	{
+		const bool bUseSocket = this->RootComponent->DoesSocketExist(ItemsSocketName);
+		ItemToAttach->AttachToComponent(this->RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, bUseSocket ? Socket : NAME_None);
+	}
 }
 
 void AEC_Plate::DrawDebugVars()
@@ -93,15 +102,6 @@ void AEC_Plate::DrawDebugVars()
 	{
 		DrawDebugString(GetWorld(), ActorLoc + FVector(0.0f, 0.0f, -150.0f), FString::Printf(TEXT("Items: %s"), *GetNameSafe(Items[i])), nullptr,
 			FColor::Green, GetWorld()->GetDeltaSeconds(), true, 1);
-	}
-}
-
-void AEC_Plate::AttachItem(AEC_Item* Item)
-{
-	if(Item)
-	{
-		const bool bUseSocket = this->RootComponent->DoesSocketExist(ItemsSocketName);
-		Item->AttachToComponent(this->RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, bUseSocket ? ItemsSocketName : NAME_None);
 	}
 }
 

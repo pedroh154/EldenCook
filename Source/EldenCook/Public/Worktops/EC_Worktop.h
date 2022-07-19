@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/EC_InteractableInterface.h"
+#include "Interfaces/EC_ItemHolderInterface.h"
 #include "EC_Worktop.generated.h"
 
 class AEC_Item;
@@ -39,7 +40,7 @@ public:
 
 //An interactable worktop like object that stores whoever collides with its box component collision.
 UCLASS(Abstract)
-class ELDENCOOK_API AEC_Worktop : public AActor, public IEC_InteractableInterface
+class ELDENCOOK_API AEC_Worktop : public AActor, public IEC_InteractableInterface, public IEC_ItemHolderInterface
 {
 	GENERATED_BODY()
 
@@ -52,30 +53,30 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-public:
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
+public:
 	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnHighlighted(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnUnhilighted(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
 
+	
+	/* ITEM HOLDER INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
 public:
-	/* ADD ITEM TO WORKTOP -------------------------------------------------------------------------------------------------------------------------- START */
-	virtual void SetWorktopItem(AEC_Item* Item);
-	/* ADD ITEM TO WORKTOP -------------------------------------------------------------------------------------------------------------------------- END */
-
-protected:
-	virtual void SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem);
-
+	virtual bool EquipItem(AEC_Item* Item) override;
+	virtual bool DropItem() override;
+	virtual bool CanEquipItem() const override;
+	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None) override;
+	virtual void DetachCurrentItem() override;
+	
 private:
-	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None);
-	virtual void DetachCurrentItem();
-
+	virtual void SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem) override;
+	/* ITEM HOLDER INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
+	
 public:
 	virtual void SetInteractingMaterial();
 	virtual void RemoveInteractingMaterial();
-
 	virtual void DrawDebugVars();
 	
 public:

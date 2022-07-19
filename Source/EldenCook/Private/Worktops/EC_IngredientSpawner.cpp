@@ -72,7 +72,7 @@ void AEC_IngredientSpawner::SpawnItem()
 				SpawnedIngredient->Init(IngredientToSpawnHandler);
 				UGameplayStatics::FinishSpawningActor(SpawnedIngredient, RootComponent->GetSocketTransform(ItemSpawnSocketName));
 		
-				SetWorktopItem(SpawnedIngredient);
+				EquipItem(SpawnedIngredient);
 	
 				//the spawned ingredient will be attached to the spawner, we dont want the player to be able to interact with the ingredient but with the spawner to grab it.
 				SpawnedIngredient->SetCurrentlyInteractable(false, SpawnedIngredient);

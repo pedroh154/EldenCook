@@ -1,59 +1,55 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
-
 #include "CoreMinimal.h"
+#include "Interfaces/EC_ItemHolderInterface.h"
 #include "Items/EC_Item.h"
 #include "EC_Plate.generated.h"
 
 /* A item that can carry multiple items inside it */
-
 class AEC_SerializableIngredient;
 UCLASS()
-class ELDENCOOK_API AEC_Plate : public AEC_Item
+class ELDENCOOK_API AEC_Plate : public AEC_Item, public IEC_ItemHolderInterface
 {
 	GENERATED_BODY()
-
-	AEC_Plate();
-
 public:
+	AEC_Plate();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-protected:
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Items)
-	TArray<AEC_Item*> Items;
-
-protected:
-	UPROPERTY(EditAnywhere, Category="AEC_Plate|Settings")
-	FName ItemsSocketName;
-
-	UPROPERTY(EditDefaultsOnly, Category="AEC_Plate|Settings")
-	int32 Slots;
+	
 
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
 public:
 	virtual void OnInteract(AEldenCookCharacter* InteractingChar) override;
 	virtual void OnInteractAnotherInteractable(IEC_InteractableInterface* Interactable) override;
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- END */
-	
-private:
-	virtual bool AddItem(AEC_Item* Ingredient, bool bFromRep = false);
-	virtual bool CanAddItem(AEC_Item* ItemToAdd);
 
+	
+	/* ITEM HOLDER INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
+public:
+	virtual bool EquipItem(AEC_Item* ItemToEquip) override;
+	virtual bool CanEquipItem() const override;
+	virtual void AttachItem(AEC_Item* ItemToAttach, FName Socket = NAME_None) override;
+private:
+	virtual void AddItem(AEC_Item* Ingredient, bool bFromRep = false) override;
+	/* ITEM HOLDER INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
+
+	
 public:
 	virtual void DrawDebugVars() override;
-
-private:
-	virtual void AttachItem(AEC_Item* Item);
 
 public:
 	UFUNCTION()
 	virtual void OnRep_Items();
 
+protected:
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Items)
+	TArray<AEC_Item*> Items;
+	
+	UPROPERTY(EditAnywhere, Category="AEC_Plate|Settings")
+	FName ItemsSocketName;
+
+	UPROPERTY(EditDefaultsOnly, Category="AEC_Plate|Settings")
+	int32 Slots;
+
 public:
-	TArray<AEC_Item*> GetItems() const
-	{
-		return Items;
-	}
+	TArray<AEC_Item*> GetItems() const { return Items; }
 	
 };

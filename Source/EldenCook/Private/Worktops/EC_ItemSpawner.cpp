@@ -56,7 +56,7 @@ void AEC_ItemSpawner::SpawnItem()
 			{
 				//finish spawning it
 				UGameplayStatics::FinishSpawningActor(SpawnedItem, RootComponent->GetSocketTransform(ItemSpawnSocketName));
-				SetWorktopItem(SpawnedItem);
+				EquipItem(SpawnedItem);
 
 				SpawnedItem->SetCurrentlyInteractable(false, SpawnedItem);
 
