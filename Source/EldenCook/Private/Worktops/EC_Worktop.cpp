@@ -4,7 +4,7 @@
 #include "Items/EC_Item.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/EldenCookCharacter.h"
-#include "Worktops/EC_IngredientSpawner.h"
+#include "Worktops/Spawners/EC_IngredientSpawner.h"
 
 AEC_Worktop::AEC_Worktop()
 {
@@ -97,7 +97,7 @@ void AEC_Worktop::OnInteract(AEldenCookCharacter* InteractingChar)
 					//give item to char
 					UE_LOG(LogTemp, Display, TEXT("SV - AEC_Worktop::OnInteract: %s taking item from %s"), *GetNameSafe(InteractingChar), *GetNameSafe(this));
 					AEC_Item* Helper = CurrentItem;
-					EquipItem(nullptr);
+					DropItem();
 					InteractingChar->EquipItem(Helper); //try to add it to the character
 				}
 			}
@@ -172,7 +172,7 @@ void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 	//this function is called by clients OnRep_CurrentItem
 	//check SetCurrentItem for character for explanation of the logic below
 	AEC_Item* LocalLastItem = nullptr;
-
+	
 	if(LastItem != nullptr)
 	{
 		LocalLastItem = LastItem;
@@ -181,33 +181,33 @@ void AEC_Worktop::SetCurrentItem(AEC_Item* NewItem, AEC_Item* LastItem)
 	{
 		LocalLastItem = CurrentItem;
 	}
-
-	if(GetLocalRole() == ROLE_Authority)
-		UE_LOG(LogTemp, Display, TEXT("AEC_Worktop::SetCurrentItem: called on server"))
-	else
-		UE_LOG(LogTemp, Display, TEXT("AEC_Worktop::SetCurrentItem: called on client by onrep_ event"))
+	
+	 if(GetLocalRole() == ROLE_Authority)
+	 	UE_LOG(LogTemp, Display, TEXT("AEC_Worktop::SetCurrentItem: called on server"))
+	 else
+	 	UE_LOG(LogTemp, Display, TEXT("AEC_Worktop::SetCurrentItem: called on client by onrep_ event"))
 	
 	
-	//adding item to worktop
-	if(NewItem && !LocalLastItem)
-	{
-		UE_LOG(LogTemp, Display, TEXT("AEC_Worktop::SetCurrentItem: %s adding to %s"), *GetNameSafe(NewItem), *GetNameSafe(this));
+	 //adding item to worktop
+	 if(NewItem && !LocalLastItem)
+	 {
+	 	UE_LOG(LogTemp, Display, TEXT("AEC_Worktop::SetCurrentItem: %s adding to %s"), *GetNameSafe(NewItem), *GetNameSafe(this));
 		
-		CurrentItem = NewItem;
-		CurrentItem->OnEnterWorktop(this);
-		
-		AttachItem(NewItem, ItemSpawnSocketName);
-	}
-	//removing item from worktop
-	else if(!NewItem && LocalLastItem)
-	{
-		UE_LOG(LogTemp, Display, TEXT("AEC_Worktop::SetCurrentItem: %s removing from %s"), *GetNameSafe(LocalLastItem), *GetNameSafe(this));
-
-		CurrentItem = nullptr;
-		LocalLastItem->OnLeaveWorktop();
-		LocalLastItem->SetActorHiddenInGame(false);
-		DetachCurrentItem();
-	}
+	 	CurrentItem = NewItem;
+	 	CurrentItem->OnEnterWorktop(this);
+	 	
+	 	AttachItem(NewItem, ItemSpawnSocketName);
+	 }
+	 //removing item from worktop
+	 else if(!NewItem && LocalLastItem)
+	 {
+	 	UE_LOG(LogTemp, Display, TEXT("AEC_Worktop::SetCurrentItem: %s removing from %s"), *GetNameSafe(LocalLastItem), *GetNameSafe(this));
+	
+	 	CurrentItem = nullptr;
+	 	LocalLastItem->OnLeaveWorktop();
+	 	LocalLastItem->SetActorHiddenInGame(false);
+	 	DetachCurrentItem();
+	 }
 }
 
 void AEC_Worktop::AttachItem(AEC_Item* ItemToAttach, FName Socket)

@@ -1,7 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
-
 #include "CoreMinimal.h"
 #include "EC_ItemSpawner.h"
 #include "Engine/DataTable.h"
@@ -26,7 +23,7 @@ protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	
 public:
-	virtual void SpawnItem() override;
+	virtual void BeginSpawnItem() override;
 
 private:
 	virtual bool CheckForDataTable();

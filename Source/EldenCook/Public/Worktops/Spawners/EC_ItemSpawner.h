@@ -23,6 +23,10 @@ protected:
 public:
 	virtual void SpawnItem() override;
 	
+protected:
+	virtual void BeginSpawnItem() override;
+	virtual void FinishSpawnItem() override;
+	
 	/* INTERACTABLE INTERFACE -------------------------------------------------------------------------------------------------------------------------- START */
 public:
 	virtual bool CanInteract(AEldenCookCharacter* InteractingChar) override;

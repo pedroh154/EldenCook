@@ -142,10 +142,10 @@ void AEldenCookCharacter::OnInteract(IEC_InteractableInterface* Interactable)
 	{
 		Server_Interact(Cast<AActor>(Interactable));
 	}
-	//if we are server, call OnInteract already
+	//if we are server, call Interact already
 	else
 	{
-		OnInteract(Interactable);
+		Interact(Interactable);
 	}
 }
 
@@ -168,7 +168,7 @@ void AEldenCookCharacter::Interact(IEC_InteractableInterface* Interactable)
 
 void AEldenCookCharacter::Server_Interact_Implementation(AActor* Interactable)
 {
-	OnInteract(Cast<IEC_InteractableInterface>(Interactable));
+	Interact(Cast<IEC_InteractableInterface>(Interactable));
 }
 /* INTERACT ----------------------------------------- END */
 
@@ -280,7 +280,7 @@ void AEldenCookCharacter::OnDropItem()
 	}
 	else
 	{
-		OnDropItem();
+		DropItem();
 	}
 }
 
